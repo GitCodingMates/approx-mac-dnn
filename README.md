@@ -4,7 +4,7 @@ Approximate multiply–accumulate (MAC) units for int8 DNN accelerators: bit-acc
 Python models, MNIST accuracy evaluation, Verilog RTL, ModelSim verification and
 Yosys synthesis.
 
-**Authors:** Sina Mozaffari Rad, Fatemeh Dastyafteh  
+**Developed by** Sina Mozaffari Rad and Fatemeh Dastyafteh  
 **Full report:** [`docs/report.pdf`](docs/report.pdf)
 
 ## Highlights
