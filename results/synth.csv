@@ -1,0 +1,10 @@
+design,cells,flip_flops,area_GE,logic_depth,area_saving_%
+exact,385,0,573.2,35,0.0
+trunc_k4,314,0,465.1,33,18.9
+trunc_k6,250,0,368.5,32,35.7
+trunc_k8,155,0,230.7,24,59.8
+mitchell,384,0,544.9,49,4.9
+mac_exact,617,50,1167.2,63,0.0
+mac_trunc_k6,444,44,870.3,51,25.4
+mac_trunc_k8,342,42,713.5,47,38.9
+mac_mitchell,621,50,1145.5,63,1.9
