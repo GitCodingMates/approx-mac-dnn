@@ -109,8 +109,49 @@ exact-integer form suitable for hardware is
   \end{cases}
 \end{equation}
 The datapath therefore consists only of two LODs, barrel shifters and a
-single adder; no partial-product array is required. The design always
-under-estimates, with a worst-case relative error of about \SI{11.1}{\percent}.
+single adder; no partial-product array is required.
+
+\paragraph{Error bound.} The bound below was derived by
+Mitchell~\cite[Sec.~III]{mitchell1962}; it is restated here in the
+notation of Eq.~(3). Since $x_i = 2^{k_i} f_i$, we have
+$S = 2^{k_1+k_2}(f_1+f_2)$, while the exact product is
+$P = 2^{k_1+k_2}(1+f_1)(1+f_2)$. Two cases follow.
+
+\emph{Case $f_1+f_2<1$.} Here $P_{\text{Mitchell}} = 2^{k_1+k_2}(1+f_1+f_2)$
+and
+\begin{equation}
+  \frac{P-P_{\text{Mitchell}}}{P} = \frac{f_1 f_2}{(1+f_1)(1+f_2)} \;\ge 0 .
+\end{equation}
+
+\emph{Case $f_1+f_2\ge 1$.} Here $P_{\text{Mitchell}} = 2^{k_1+k_2+1}(f_1+f_2)$
+and
+\begin{equation}
+  \frac{P-P_{\text{Mitchell}}}{P} = \frac{(1-f_1)(1-f_2)}{(1+f_1)(1+f_2)} \;\ge 0 .
+\end{equation}
+
+Both expressions are non-negative, so the multiplier never over-estimates.
+In the first case, write $g(f)=f/(1+f)$, which is increasing; the error is
+$g(f_1)g(f_2)$ and grows with both fractions, so its supremum lies on the
+boundary $f_1+f_2=1$. In the second case, $h(f)=(1-f)/(1+f)$ is decreasing
+and the error $h(f_1)h(f_2)$ is also largest on $f_1+f_2=1$. On that line,
+with $f_2 = 1-f_1$, both cases give the same value,
+\begin{equation}
+  E(f_1) = \frac{f_1(1-f_1)}{(1+f_1)(2-f_1)} ,
+\end{equation}
+which is symmetric about $f_1=\tfrac12$. Setting $E'(f_1)=0$ gives
+$(1-2f_1)\bigl[(1+f_1)(2-f_1)-f_1(1-f_1)\bigr]=0$, where the bracket equals 2,
+so $f_1=f_2=\tfrac12$ and
+\begin{equation}
+  E_{\max} = \frac{\tfrac12\cdot\tfrac12}{\tfrac32\cdot\tfrac32}
+           = \frac{1}{9} \approx \SI{11.1}{\percent}.
+\end{equation}
+This is the well-known worst-case relative error of the Mitchell
+multiplier~\cite{mitchell1962,jiang2020survey}. For 8-bit operands
+$f=\tfrac12$ is reachable, e.g.\ $a=b=3$ gives $P=9$ and
+$P_{\text{Mitchell}}=8$. The exhaustive evaluation of the bit-accurate model
+over all operand pairs (Section~\ref{sec:results}) confirms a maximum
+relative error of exactly $1/9$, attained whenever $|a|=3\cdot 2^{i}$ and
+$|b|=3\cdot 2^{j}$.
 
 \section{Methodology}
 
@@ -152,7 +193,7 @@ replaced by the corresponding approximate multiplier, exactly as it would
 occur inside the accelerator's PEs. Accuracy is measured on the full
 10{,}000-image test set.
 
-\section{Results}
+\section{Results}\label{sec:results}
 
 \subsection{Arithmetic error}
 Table~\ref{tab:error} summarizes the exhaustive error characterization, and
