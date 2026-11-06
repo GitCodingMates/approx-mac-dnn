@@ -1,0 +1,84 @@
+# do regression.do
+# ../../rtl
+# ../../tb
+# Model Technology ModelSim SE-64 vmap 2020.4 Lib Mapping Utility 2020.10 Oct 13 2020
+# vmap work work 
+# Modifying modelsim.ini
+# vsim -coverage -onfinish stop -voptargs="+acc" work.tb_mul 
+# Start time: 18:39:45 on Nov 06,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# //  ModelSim SE-64 2020.4 Oct 13 2020
+# //
+# //  Copyright 1991-2020 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading work.tb_mul(fast)
+# Loading work.mul_exact(fast)
+# Loading work.sign_mag(fast)
+# Loading work.mul_trunc(fast)
+# Loading work.mul_trunc(fast__1)
+# Loading work.mul_trunc(fast__2)
+# Loading work.mul_mitchell(fast)
+# exact    : 0 / 65536 mismatches
+# trunc_k4 : 0 / 65536 mismatches
+# trunc_k6 : 0 / 65536 mismatches
+# trunc_k8 : 0 / 65536 mismatches
+# mitchell : 0 / 65536 mismatches
+# PASS: all multipliers match the golden model
+# ** Note: $finish    : ../../tb/tb_mul.v(68)
+#    Time: 65536 ns  Iteration: 0  Instance: /tb_mul
+# Break in Module tb_mul at ../../tb/tb_mul.v line 68
+# Stopped at ../../tb/tb_mul.v line 68
+# End time: 18:39:48 on Nov 06,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 0
+# vsim -coverage -onfinish stop -voptargs="+acc" work.tb_mac 
+# Start time: 18:39:48 on Nov 06,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# Loading work.tb_mac(fast)
+# Loading work.mac(fast)
+# Loading work.mul_exact(fast)
+# Loading work.sign_mag(fast)
+# Loading work.mac(fast__1)
+# Loading work.mul_trunc(fast)
+# Loading work.mac(fast__2)
+# Loading work.mul_mitchell(fast)
+# MAC: 20005 cycles checked, 0 mismatches
+# final acc: exact=-135154 trunc_k6=-133312 mitchell=-128275
+# PASS
+# ** Note: $finish    : ../../tb/tb_mac.v(78)
+#    Time: 200075 ns  Iteration: 1  Instance: /tb_mac
+# Break in Module tb_mac at ../../tb/tb_mac.v line 78
+# Stopped at ../../tb/tb_mac.v line 78
+# End time: 18:39:51 on Nov 06,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 0
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vcover 2020.4 Coverage Utility 2020.10 Oct 13 2020
+# Start time: 18:39:52 on Nov 06,2026
+# vcover report -summary regression.ucdb -output coverage_summary.txt 
+# End time: 18:39:52 on Nov 06,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vcover 2020.4 Coverage Utility 2020.10 Oct 13 2020
+# Start time: 18:39:52 on Nov 06,2026
+# vcover report -details -code bcest regression.ucdb -output coverage_details.txt 
+# End time: 18:39:52 on Nov 06,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Coverage Report Totals BY INSTANCES: Number of Instances 21
+# 
+#     Enabled Coverage              Bins      Hits    Misses    Weight  Coverage
+#     ----------------              ----      ----    ------    ------  --------
+#     Branches                        78        78         0         1   100.00%
+#     Conditions                       2         2         0         1   100.00%
+#     Expressions                     20        20         0         1   100.00%
+#     Statements                     122       122         0         1   100.00%
+#     Toggles                       1600      1416       184         1    88.50%
+# Total coverage (filtered view): 97.70%
+# 
+# 
