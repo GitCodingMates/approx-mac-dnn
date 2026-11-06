@@ -5,3 +5,8 @@ __pycache__/
 *.log
 *.out
 *.toc
+tb/vectors/
+tb/work/
+tb/transcript
+*.wlf
+*.vvp
