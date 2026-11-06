@@ -308,6 +308,72 @@ Widening the sum to 4 bits fixed the design. Such width-dependent errors
 appear only for specific operand ranges and are easily missed by random
 testing, but cannot escape an exhaustive check.
 
+\subsection{Simulation Environment and Code Coverage}
+Simulation is performed in ModelSim SE-64 2020.4. The
+\texttt{sim/modelsim} directory contains a ModelSim project
+(\texttt{approx\_mac.mpf}) and a set of Tcl scripts: \texttt{compile.do}
+builds the \texttt{work} library, \texttt{sim\_mul.do} and
+\texttt{sim\_mac.do} run the two testbenches (with a predefined wave layout
+in GUI mode), and \texttt{regression.do} runs the complete suite in batch
+mode, merges the coverage databases of both tests and writes a coverage
+report. The RTL is compiled with statement, branch, condition, expression
+and toggle coverage enabled.
+
+\begin{table}[h]
+\centering
+\caption{Merged code coverage of the RTL over both testbenches (21 instances).}
+\label{tab:cov}
+\begin{tabular}{lrrr}
+\toprule
+Metric & Bins & Hit & Coverage (\%) \\
+\midrule
+Statements  & 122  & 122  & 100.0 \\
+Branches    & 78   & 78   & 100.0 \\
+Conditions  & 2    & 2    & 100.0 \\
+Expressions & 20   & 20   & 100.0 \\
+Toggles     & 1600 & 1416 & 88.5  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All statements, branches, conditions and expressions are exercised
+(Table~\ref{tab:cov}). Every missed toggle bin was inspected and is
+structurally unreachable rather than a gap in the tests: the product bits
+below column $K$ of the truncated multipliers are constant zero by design,
+bit~15 of the product magnitude can never be set because the largest
+magnitude is $128\times128=2^{14}$, and the upper bits of the 32-bit
+accumulator are not reached by 784-term dot products of int8 data.
+
+Figure~\ref{fig:wave} shows the first cycles of the MAC test, rendered
+from the VCD file dumped by ModelSim. The product of the operands applied
+in one cycle appears in \texttt{p\_q} one cycle later and is added to
+\texttt{acc} in the following cycle; during the idle cycle (\texttt{en}
+low) the accumulator holds its value. The accumulator matches the
+reference model on every cycle.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{mac_waveform.png}
+\caption{ModelSim waveform of the exact MAC (values in decimal). The
+green row is the cycle-accurate reference model of the testbench.}
+\label{fig:wave}
+\end{figure}
+
+Figure~\ref{fig:msgui} shows the same test in the ModelSim GUI, opened with
+\texttt{vsim -do gui.do}. The predefined layout (\texttt{wave\_mac.do})
+groups the control signals, operands and, for each of the three MAC
+variants, the RTL accumulator directly above the reference model, so that
+any divergence is visible at a glance. The \texttt{errs} counter stays at
+zero for the whole run.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{modelsim_wave.png}
+\caption{ModelSim SE-64 2020.4 wave window during \texttt{tb\_mac}: exact,
+truncated ($K=6$) and Mitchell MACs, each with its reference accumulator.}
+\label{fig:msgui}
+\end{figure}
+
 \section{Logic Synthesis and Design-Space Exploration}
 \label{sec:synth}
 
@@ -421,12 +487,17 @@ python/pareto.py            design-space plot and summary table
 rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
                             mul_mitchell, mac
 tb/                         self-checking testbenches, run_sim.sh
+sim/modelsim/               ModelSim project, do-scripts, coverage flow
+python/plot_waveform.py     timing diagram from the ModelSim VCD dump
 results/                    metrics (CSV), figures, quantized model
 docs/report.tex             this report
 \end{lstlisting}
 All experiments are reproducible with
 \texttt{pip install -r requirements.txt}, running the Python scripts in the
-order listed above, and \texttt{sh tb/run\_sim.sh} for RTL simulation.
+order listed above, and \texttt{vsim -c -do regression.do} in
+\texttt{sim/modelsim} for the RTL regression with coverage
+(\texttt{sh tb/run\_sim.sh} provides a minimal flow that also works with
+Icarus Verilog).
 
 \begin{thebibliography}{9}
 \bibitem{mitchell1962}
