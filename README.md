@@ -94,9 +94,9 @@ are stored in [`results/synth/`](results/synth).
 
 <p align="center">
   <img src="results/synth/mac_schematic.png" width="950" alt="Yosys schematic of the MAC">
-  <br><em>Figure 4. Yosys schematic of the MAC unit with the truncated multiplier (K = 8) after elaboration:
-  multiplier instance, pipeline flip-flops (<code>$dff</code>), accumulator adder (<code>$add</code>) and
-  the multiplexers for reset, enable and clear.</em>
+  <br><em>Figure 4. Yosys schematic of the MAC unit with the truncated multiplier (K = 8) after <code>proc</code> and <code>opt -full</code>:
+  multiplier instance, pipeline registers with synchronous reset (<code>$sdff</code>, <code>$sdffe</code>), the clear multiplexer
+  (<code>$mux</code>) and the accumulator adder (<code>$add</code>).</em>
 </p>
 
 ### 3.3 Hardware Cost and Accuracy

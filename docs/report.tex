@@ -462,8 +462,26 @@ multiplier ($K=8$), read from its synthesis log.}
 \centering
 \includegraphics[width=\textwidth]{synth/mac_schematic.pdf}
 \caption{Yosys schematic of the MAC unit with the truncated multiplier
-($K=8$), generated with \texttt{show} after elaboration.}
+($K=8$), generated with \texttt{show} after \texttt{proc} and
+\texttt{opt -full}. Reset and enable logic is absorbed into flip-flops with
+synchronous reset (\texttt{\$sdff}) and enable (\texttt{\$sdffe}).}
 \label{fig:schem}
+\end{figure}
+
+Figure~\ref{fig:schemtikz} redraws the same netlist as a register-transfer
+schematic. Every element corresponds to one Yosys cell of
+Figure~\ref{fig:schem}: the multiplier instance, the four registers
+(\texttt{\$144}--\texttt{\$146} and \texttt{\$143}), the clear multiplexer
+(\texttt{\$53}) and the accumulator adder (\texttt{\$54}); the sign extension
+is pure wiring.
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/mac_schematic.tex}}
+\caption{Register-transfer schematic of the MAC unit derived from the Yosys
+netlist. Thick lines are buses; \texttt{clr\_q} selects the constant zero to
+restart accumulation, and \texttt{v\_q} enables the accumulator register.}
+\label{fig:schemtikz}
 \end{figure}
 
 \subsection{Results}
