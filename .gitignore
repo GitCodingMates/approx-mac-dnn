@@ -17,3 +17,5 @@ sim/modelsim/*.ucdb
 sim/modelsim/*.vcd
 sim/modelsim/*.log
 sim/modelsim/coverage_*.txt
+sim/modelsim/wlf*
+sim/modelsim/*.cr.mti
