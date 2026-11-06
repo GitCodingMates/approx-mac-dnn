@@ -58,8 +58,9 @@ The goals of this project are:
         approximate multipliers;
   \item to characterize their arithmetic error with standard metrics;
   \item to measure their impact on the accuracy of a quantized neural network;
-  \item to implement them in Verilog and quantify the hardware savings
-        (in progress, Section~\ref{sec:next}).
+  \item to implement them in synthesizable Verilog and verify the RTL
+        exhaustively against the reference models;
+  \item to quantify the hardware savings (in progress, Section~\ref{sec:next}).
 \end{enumerate}
 
 \section{Multiplier Designs}
@@ -218,15 +219,92 @@ less than half a percentage point. Two effects explain this resilience:
         changes the \texttt{argmax}.
 \end{enumerate}
 
+\section{RTL Implementation}
+All designs are written in synthesizable Verilog-2001 (\texttt{rtl/}) and
+share a common \texttt{sign\_mag} front end that converts the
+two's-complement operands to 8-bit magnitudes and computes the product sign.
+
+\begin{itemize}[nosep]
+  \item \texttt{mul\_exact} -- baseline $8\times8$ magnitude multiplier.
+  \item \texttt{mul\_trunc \#(K)} -- the partial-product array is built
+        row by row; in row $j$ the bits of $|a|$ below position $K-j$ are
+        masked with an elaboration-time constant, so the corresponding AND
+        gates and adder inputs are removed by synthesis rather than gated at
+        run time. A single parameter covers the whole design space.
+  \item \texttt{mul\_mitchell} -- two priority-encoder LODs, mantissa
+        extraction by clearing the leading one, two barrel shifters, one
+        16-bit adder and a comparator/multiplexer that selects between the
+        two cases of Eq.~(3).
+  \item \texttt{mac \#(MUL,K)} -- a two-stage pipelined MAC. Stage~1
+        registers the product, stage~2 sign-extends it and accumulates into
+        a 32-bit register. A \texttt{clr} input restarts the accumulation so
+        consecutive dot products can be streamed without bubbles, and an
+        \texttt{en} input supports idle cycles. The multiplier is selected at
+        elaboration time with a \texttt{generate} block, so all variants share
+        one PE description.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\setlength{\fboxsep}{6pt}
+\fbox{\parbox{0.9\textwidth}{\centering\small
+$a,b$ (int8) $\;\rightarrow\;$ \texttt{sign\_mag} $\;\rightarrow\;$
+\{\,exact $\mid$ truncated($K$) $\mid$ Mitchell\,\} $\;\rightarrow\;$
+\fbox{\texttt{p\_q}} $\;\rightarrow\;$ $+$ $\;\rightarrow\;$
+\fbox{\texttt{acc} (int32)}$\,\circlearrowleft$}}
+\caption{MAC datapath. Boxed signals are pipeline registers; the multiplier
+block is chosen by the \texttt{MUL} parameter.}
+\label{fig:mac}
+\end{figure}
+
+\section{Functional Verification}
+Verification reuses the Python models as the golden reference.
+\texttt{python/gen\_vectors.py} exports, for each design, the expected
+product of all $2^{16}$ operand pairs as a hex table indexed by
+$\{a,b\}$. Two self-checking testbenches (\texttt{tb/}) were run in
+ModelSim; both are also compatible with Icarus Verilog.
+
+\begin{itemize}[nosep]
+  \item \textbf{\texttt{tb\_mul}} applies all 65{,}536 operand pairs to the
+        five multiplier instances simultaneously and compares every output
+        bit-exactly with the golden table.
+  \item \textbf{\texttt{tb\_mac}} streams 20{,}000 random operand pairs into
+        three MACs (exact, truncated $K{=}6$, Mitchell) with randomly
+        inserted idle cycles and a \texttt{clr} every 784 terms, mimicking
+        the first layer of the MLP. A cycle-accurate reference accumulator
+        with the same two-cycle latency checks the output on every cycle.
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{RTL verification results.}
+\label{tab:verif}
+\begin{tabular}{llrr}
+\toprule
+Testbench & Design & Checks & Mismatches \\
+\midrule
+\texttt{tb\_mul} & exact             & 65{,}536 & 0 \\
+                 & truncated $K{=}4$ & 65{,}536 & 0 \\
+                 & truncated $K{=}6$ & 65{,}536 & 0 \\
+                 & truncated $K{=}8$ & 65{,}536 & 0 \\
+                 & Mitchell          & 65{,}536 & 0 \\
+\midrule
+\texttt{tb\_mac} & exact, trunc.\ $K{=}6$, Mitchell & 20{,}005 cycles & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The exhaustive comparison proved its value during development: the first
+Mitchell implementation failed on 31{,}193 of the 65{,}536 pairs. The
+cause was the shift amount $k_1+k_2$, which Verilog evaluated with the
+3-bit width of its operands and therefore wrapped for $k_1+k_2\ge 8$.
+Widening the sum to 4 bits fixed the design. Such width-dependent errors
+appear only for specific operand ranges and are easily missed by random
+testing, but cannot escape an exhaustive check.
+
 \section{Work in Progress}
 \label{sec:next}
 \begin{enumerate}[nosep]
-  \item \textbf{RTL implementation.} Parameterized Verilog modules for the
-        exact, truncated and Mitchell multipliers, and a MAC wrapper with an
-        int32 accumulator.
-  \item \textbf{Exhaustive RTL verification.} A self-checking testbench that
-        compares all $2^{16}$ products of each design against the Python
-        golden model.
   \item \textbf{Hardware cost.} Logic synthesis with Yosys to compare cell
         count and estimated area, giving the final
         \emph{area saving vs.\ accuracy loss} Pareto front.
@@ -240,12 +318,16 @@ python/approx_mult.py       bit-accurate multiplier models
 python/error_analysis.py    exhaustive error metrics and heatmaps
 python/train_quantize.py    NumPy MLP training and int8 quantization
 python/approx_inference.py  inference through approximate multipliers
+python/gen_vectors.py       golden vectors for RTL verification
+rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
+                            mul_mitchell, mac
+tb/                         self-checking testbenches, run_sim.sh
 results/                    metrics (CSV), figures, quantized model
 docs/report.tex             this report
 \end{lstlisting}
 All experiments are reproducible with
-\texttt{pip install -r requirements.txt} followed by running the four scripts
-in the order listed above.
+\texttt{pip install -r requirements.txt}, running the Python scripts in the
+order listed above, and \texttt{sh tb/run\_sim.sh} for RTL simulation.
 
 \begin{thebibliography}{9}
 \bibitem{mitchell1962}
