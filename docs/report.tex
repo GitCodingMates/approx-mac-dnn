@@ -1,0 +1,276 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{enumitem}
+
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\graphicspath{{../results/}}
+
+\lstset{basicstyle=\ttfamily\small,keywordstyle=\color{blue!60!black}\bfseries,
+        commentstyle=\color{gray},frame=single,breaklines=true,columns=fullflexible}
+
+\title{\textbf{Approximate Multiply--Accumulate Units for\\Energy-Efficient DNN Accelerators}\\[4pt]
+       \large Error Characterization and Application-Level Evaluation}
+\author{Sina Mozaffarirad\\
+        \small\url{https://github.com/Sinamozaffarirad/approx-mac-dnn}}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multiply--accumulate (MAC) operations dominate both the computation and the
+energy budget of deep neural network (DNN) inference. Because DNNs are
+inherently tolerant to small numerical errors, the exact multiplier inside each
+MAC can be replaced with a cheaper \emph{approximate} multiplier. This project
+studies that trade-off for 8-bit signed arithmetic. Bit-accurate models of an
+exact array multiplier, three column-truncated multipliers, and Mitchell's
+logarithmic multiplier were developed and characterized exhaustively over all
+$2^{16}$ input pairs. A fully-connected network was trained on MNIST,
+quantized to int8 with int32 accumulation, and evaluated with every
+multiplication routed through each approximate design. Results show that even
+a multiplier with a mean relative error of \SI{23.9}{\percent} reduces
+classification accuracy by only \SI{0.42}{\percent}, confirming that large
+hardware savings are available at negligible application-level cost.
+\end{abstract}
+
+\section{Introduction}
+The processing elements (PEs) of a DNN accelerator are, at their core, MAC
+units. In an 8-bit datapath the multiplier is the largest and most
+power-hungry part of the PE, so its cost scales directly with the size of the
+PE array. \emph{Approximate computing} exploits the error resilience of
+DNNs: errors in individual products are partially averaged out across long dot
+products, and the final classification decision (an \texttt{argmax}) is
+insensitive to small perturbations of the output scores.
+
+The goals of this project are:
+\begin{enumerate}[nosep]
+  \item to build bit-accurate, hardware-oriented models of representative
+        approximate multipliers;
+  \item to characterize their arithmetic error with standard metrics;
+  \item to measure their impact on the accuracy of a quantized neural network;
+  \item to implement them in Verilog and quantify the hardware savings
+        (in progress, Section~\ref{sec:next}).
+\end{enumerate}
+
+\section{Multiplier Designs}
+All designs operate on 8-bit two's-complement operands
+$a,b\in[-128,127]$ and are implemented in sign-magnitude form: the magnitudes
+$|a|,|b|\in[0,128]$ are multiplied and the sign is restored as
+$\operatorname{sgn}(a)\oplus\operatorname{sgn}(b)$. This makes the error of
+every approximate design symmetric around zero.
+
+\subsection{Exact array multiplier (baseline)}
+The product is the sum of $N^2$ partial-product bits,
+\begin{equation}
+  P = \sum_{i=0}^{N-1}\sum_{j=0}^{N-1} a_i\, b_j\, 2^{i+j}, \qquad N = 8 .
+\end{equation}
+
+\subsection{Column-truncated multiplier}
+All partial-product bits whose weight falls below column $k$ are removed:
+\begin{equation}
+  P_{\text{trunc}}(k) = \sum_{i+j\ \ge\ k} a_i\, b_j\, 2^{i+j}.
+\end{equation}
+Each removed bit eliminates one AND gate and its share of the
+carry-save adder tree. For $k=4,6,8$, respectively 10, 21 and 36 of the 64
+partial-product bits are removed. No error-compensation constant is added, so
+the design always under-estimates the product magnitude.
+
+\subsection{Mitchell logarithmic multiplier}
+Writing each operand as $x = 2^{k}(1+f)$, where $k=\lfloor\log_2 x\rfloor$ is
+found by a leading-one detector (LOD) and $0\le f<1$, Mitchell's
+algorithm~\cite{mitchell1962} approximates
+$\log_2(ab)\approx k_1+k_2+f_1+f_2$. With $x_i = |a_i| - 2^{k_i}$, an
+exact-integer form suitable for hardware is
+\begin{equation}
+  S = x_1 2^{k_2} + x_2 2^{k_1},\qquad
+  P_{\text{Mitchell}} =
+  \begin{cases}
+    2^{k_1+k_2} + S, & S < 2^{k_1+k_2}\\
+    2S,              & \text{otherwise.}
+  \end{cases}
+\end{equation}
+The datapath therefore consists only of two LODs, barrel shifters and a
+single adder; no partial-product array is required. The design always
+under-estimates, with a worst-case relative error of about \SI{11.1}{\percent}.
+
+\section{Methodology}
+
+\subsection{Bit-accurate reference models}
+Each design is described in Python/NumPy at the bit level
+(\texttt{python/approx\_mult.py}), mirroring the intended RTL structure
+(partial-product selection, LOD, shifts). These models serve as the golden
+reference for RTL verification. For fast evaluation, each model is expanded
+into a $256\times256$ product look-up table.
+
+\subsection{Error metrics}
+Every design is evaluated over all $65{,}536$ input pairs. With
+$P$ the exact and $\hat P$ the approximate product, and
+$\text{ED}=|\hat P - P|$, the following metrics are reported~\cite{jiang2020survey}:
+\begin{itemize}[nosep]
+  \item \textbf{ER} -- error rate, fraction of inputs with $\text{ED}\neq 0$;
+  \item \textbf{MED} -- mean error distance, $\mathbb{E}[\text{ED}]$;
+  \item \textbf{NMED} -- MED normalized by the maximum product ($128^2$);
+  \item \textbf{MRED} -- mean relative error distance, $\mathbb{E}[\text{ED}/|P|]$ over $P\neq0$;
+  \item \textbf{Max ED} -- worst-case absolute error.
+\end{itemize}
+
+\subsection{Quantized neural network}
+A 784--128--10 multilayer perceptron with ReLU activation was trained on
+MNIST~\cite{lecun1998} for eight epochs using mini-batch SGD
+(batch 128, learning rate 0.1), implemented directly in NumPy.
+The trained network was then quantized following the integer-only inference
+scheme of~\cite{jacob2018}:
+\begin{itemize}[nosep]
+  \item inputs: $x_q = \operatorname{round}(127\,x)$, $x\in[0,1]$;
+  \item weights: symmetric per-tensor int8, $s_w = \max|W|/127$;
+  \item biases: int32 at scale $s_x s_w$;
+  \item accumulation: int32;
+  \item hidden activations: requantized to unsigned 7-bit values using a scale
+        calibrated on 5{,}000 training images (99.99th percentile).
+\end{itemize}
+During approximate inference, \emph{every} multiplication in both layers is
+replaced by the corresponding approximate multiplier, exactly as it would
+occur inside the accelerator's PEs. Accuracy is measured on the full
+10{,}000-image test set.
+
+\section{Results}
+
+\subsection{Arithmetic error}
+Table~\ref{tab:error} summarizes the exhaustive error characterization, and
+Figure~\ref{fig:heat} shows how the relative error is distributed over the
+input space.
+
+\begin{table}[h]
+\centering
+\caption{Error characterization over all $2^{16}$ signed 8-bit input pairs.}
+\label{tab:error}
+\begin{tabular}{lrrrrr}
+\toprule
+Multiplier & ER (\%) & MED & NMED (\%) & MRED (\%) & Max ED \\
+\midrule
+Exact          & 0.00  & 0.00   & 0.000 & 0.00  & 0    \\
+Truncated $k{=}4$ & 81.25 & 12.25  & 0.075 & 1.72  & 49   \\
+Truncated $k{=}6$ & 93.75 & 80.25  & 0.490 & 7.59  & 321  \\
+Truncated $k{=}8$ & 98.05 & 384.75 & 2.348 & 23.87 & 1537 \\
+Mitchell       & 87.89 & 151.34 & 0.924 & 3.70  & 1024 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{error_heatmaps.png}
+\caption{Relative error (\%) of each approximate multiplier as a function of
+its operands. Truncation errors concentrate at small operands, where the
+removed low-order columns carry a larger share of the product; Mitchell's
+error depends on the fractional parts of both operands and is bounded at
+about \SI{11}{\percent}.}
+\label{fig:heat}
+\end{figure}
+
+The measured MRED of the Mitchell multiplier (\SI{3.70}{\percent}) agrees with
+the value reported in the literature (\SI{\approx3.8}{\percent}), which
+validates the model. Truncation exhibits a clear knob: each increase of $k$ by
+two columns raises the MED by roughly a factor of five.
+
+\subsection{Application-level accuracy}
+\begin{table}[h]
+\centering
+\caption{MNIST test accuracy of the int8 MLP with each multiplier.
+Float32 reference: \SI{96.82}{\percent}.}
+\label{tab:acc}
+\begin{tabular}{lrr}
+\toprule
+Multiplier & Accuracy (\%) & $\Delta$ vs.\ exact int8 \\
+\midrule
+Exact (int8)      & 96.81 & --    \\
+Truncated $k{=}4$ & 96.82 & $+0.01$ \\
+Truncated $k{=}6$ & 96.77 & $-0.04$ \\
+Truncated $k{=}8$ & 96.39 & $-0.42$ \\
+Mitchell          & 96.77 & $-0.04$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:acc} shows the central result of this project: arithmetic error
+and application error are only weakly coupled. Int8 quantization itself costs
+just \SI{0.01}{\percent}. Truncation up to $k=6$ and the Mitchell multiplier are
+practically lossless, and even $k=8$ truncation---which removes more than half
+of the partial-product array and has an MRED above \SI{20}{\percent}---loses
+less than half a percentage point. Two effects explain this resilience:
+\begin{enumerate}[nosep]
+  \item \textbf{Error averaging.} Each output neuron accumulates up to 784
+        products; independent errors partially cancel, so the relative error
+        of the sum is far smaller than that of a single product.
+  \item \textbf{Decision robustness.} Classification depends only on the
+        ranking of the output scores, so a systematic, roughly proportional
+        under-estimation (as produced by both truncation and Mitchell) rarely
+        changes the \texttt{argmax}.
+\end{enumerate}
+
+\section{Work in Progress}
+\label{sec:next}
+\begin{enumerate}[nosep]
+  \item \textbf{RTL implementation.} Parameterized Verilog modules for the
+        exact, truncated and Mitchell multipliers, and a MAC wrapper with an
+        int32 accumulator.
+  \item \textbf{Exhaustive RTL verification.} A self-checking testbench that
+        compares all $2^{16}$ products of each design against the Python
+        golden model.
+  \item \textbf{Hardware cost.} Logic synthesis with Yosys to compare cell
+        count and estimated area, giving the final
+        \emph{area saving vs.\ accuracy loss} Pareto front.
+  \item \textbf{Extensions.} Error-compensated truncation, and evaluation on
+        a convolutional network with a harder dataset.
+\end{enumerate}
+
+\section{Repository Structure}
+\begin{lstlisting}
+python/approx_mult.py       bit-accurate multiplier models
+python/error_analysis.py    exhaustive error metrics and heatmaps
+python/train_quantize.py    NumPy MLP training and int8 quantization
+python/approx_inference.py  inference through approximate multipliers
+results/                    metrics (CSV), figures, quantized model
+docs/report.tex             this report
+\end{lstlisting}
+All experiments are reproducible with
+\texttt{pip install -r requirements.txt} followed by running the four scripts
+in the order listed above.
+
+\begin{thebibliography}{9}
+\bibitem{mitchell1962}
+J.~N. Mitchell, ``Computer multiplication and division using binary
+logarithms,'' \emph{IRE Transactions on Electronic Computers}, vol.~EC-11,
+no.~4, pp.~512--517, 1962.
+
+\bibitem{jiang2020survey}
+H.~Jiang, F.~J.~H. Santiago, H.~Mo, L.~Liu, and J.~Han, ``Approximate
+arithmetic circuits: A survey, characterization, and recent applications,''
+\emph{Proceedings of the IEEE}, vol.~108, no.~12, pp.~2108--2135, 2020.
+
+\bibitem{mrazek2017}
+V.~Mrazek, R.~Hrbacek, Z.~Vasicek, and L.~Sekanina, ``EvoApprox8b: Library of
+approximate adders and multipliers for circuit design and benchmarking of
+approximation methods,'' in \emph{Proc.\ DATE}, 2017, pp.~258--261.
+
+\bibitem{jacob2018}
+B.~Jacob \emph{et al.}, ``Quantization and training of neural networks for
+efficient integer-arithmetic-only inference,'' in \emph{Proc.\ CVPR}, 2018,
+pp.~2704--2713.
+
+\bibitem{lecun1998}
+Y.~LeCun, L.~Bottou, Y.~Bengio, and P.~Haffner, ``Gradient-based learning
+applied to document recognition,'' \emph{Proceedings of the IEEE}, vol.~86,
+no.~11, pp.~2278--2324, 1998.
+\end{thebibliography}
+
+\end{document}
