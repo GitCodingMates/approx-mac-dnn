@@ -39,8 +39,13 @@ $2^{16}$ input pairs. A fully-connected network was trained on MNIST,
 quantized to int8 with int32 accumulation, and evaluated with every
 multiplication routed through each approximate design. Results show that even
 a multiplier with a mean relative error of \SI{23.9}{\percent} reduces
-classification accuracy by only \SI{0.42}{\percent}, confirming that large
-hardware savings are available at negligible application-level cost.
+classification accuracy by only \SI{0.42}{\percent}. All designs were
+implemented in Verilog, verified exhaustively against the reference models,
+and synthesized with Yosys. The truncated multiplier reduces multiplier area by
+\SI{59.8}{\percent} and complete MAC area by \SI{38.9}{\percent}, whereas
+the logarithmic multiplier saves less than \SI{5}{\percent} at this operand
+width, showing that the best approximation strategy depends on the datapath
+width and cannot be chosen from error metrics alone.
 \end{abstract}
 
 \section{Introduction}
@@ -60,7 +65,8 @@ The goals of this project are:
   \item to measure their impact on the accuracy of a quantized neural network;
   \item to implement them in synthesizable Verilog and verify the RTL
         exhaustively against the reference models;
-  \item to quantify the hardware savings (in progress, Section~\ref{sec:next}).
+  \item to quantify the hardware savings by logic synthesis and identify
+        the best area--accuracy trade-offs (Section~\ref{sec:synth}).
 \end{enumerate}
 
 \section{Multiplier Designs}
@@ -302,14 +308,105 @@ Widening the sum to 4 bits fixed the design. Such width-dependent errors
 appear only for specific operand ranges and are easily missed by random
 testing, but cannot escape an exhaustive check.
 
-\section{Work in Progress}
+\section{Logic Synthesis and Design-Space Exploration}
+\label{sec:synth}
+
+\subsection{Flow}
+Each multiplier and MAC was synthesized with Yosys~0.70 and ABC
+(\texttt{python/synth.py}). After flattening and generic optimization, the
+netlist was mapped by ABC onto a technology-independent library of
+2-input gates (AND, NAND, OR, NOR, XOR, XNOR, AND-NOT, OR-NOT) and 2:1
+multiplexers. Area is reported in NAND2-equivalent gates (GE) using
+relative cell areas typical of a standard-cell library (NAND2/NOR2 $=1$,
+AND2/OR2 $=1.33$, XOR2/XNOR2/MUX2 $=2.33$, inverter $=0.67$, flip-flop
+$\approx4.3$--$6$). Delay is approximated by the logic depth, i.e.\ the
+number of gates on the longest combinational path. These figures are not
+a substitute for a characterized PDK, but they are consistent across
+designs and therefore suitable for relative comparison.
+
+\subsection{Results}
+\begin{table}[h]
+\centering
+\caption{Synthesis results. Savings are relative to the exact multiplier
+or the exact MAC, respectively.}
+\label{tab:synth}
+\begin{tabular}{lrrrrr}
+\toprule
+Design & Cells & FFs & Area (GE) & Saving (\%) & Logic depth \\
+\midrule
+Exact multiplier   & 385 & 0  & 573.2  & --   & 35 \\
+Truncated $K{=}4$  & 314 & 0  & 465.1  & 18.9 & 33 \\
+Truncated $K{=}6$  & 250 & 0  & 368.5  & 35.7 & 32 \\
+Truncated $K{=}8$  & 155 & 0  & 230.7  & 59.8 & 24 \\
+Mitchell           & 384 & 0  & 544.9  & 4.9  & 49 \\
+\midrule
+MAC, exact         & 617 & 50 & 1167.2 & --   & 63 \\
+MAC, trunc.\ $K{=}6$ & 444 & 44 & 870.3  & 25.4 & 51 \\
+MAC, trunc.\ $K{=}8$ & 342 & 42 & 713.5  & 38.9 & 47 \\
+MAC, Mitchell      & 621 & 50 & 1145.5 & 1.9  & 63 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{pareto.png}
+\caption{Design space of the 8-bit multipliers. Left: MNIST accuracy versus
+multiplier area. Right: mean relative error versus area. The dashed line
+connects the truncation family.}
+\label{fig:pareto}
+\end{figure}
+
+\subsection{Discussion}
+\paragraph{Truncation dominates the design space.} Table~\ref{tab:synth}
+and Figure~\ref{fig:pareto} show that column truncation provides an almost
+linear area--error knob. Truncation at $K=6$ removes \SI{35.7}{\percent}
+of the multiplier area for a \SI{0.04}{\percent} accuracy loss, and $K=8$
+removes \SI{59.8}{\percent} for \SI{0.42}{\percent}. Truncation also
+shortens the critical path, since the removed low-order columns shorten
+the carry chain of the final adder. The saving carries over to the
+complete PE: the MAC with $K=8$ is \SI{38.9}{\percent} smaller than the
+exact MAC. Part of this comes for free, because the always-zero low bits
+of the product are detected by synthesis and their pipeline flip-flops
+are removed (50 $\rightarrow$ 42 FFs).
+
+\paragraph{Mitchell is not efficient at 8 bits.} Although its error is
+moderate (MRED \SI{3.7}{\percent}), the Mitchell multiplier saves only
+\SI{4.9}{\percent} of the area and has the \emph{longest} critical path
+(49 vs.\ 35 gates). Its overhead---two leading-one detectors, two barrel
+shifters, a comparator and a final multiplexer---is roughly constant,
+whereas the partial-product array it replaces grows quadratically with the
+operand width. At 8 bits the array is still small, so the overhead
+cancels most of the benefit. Logarithmic multipliers are therefore better
+suited to wider datapaths (16 bits and above), while truncation-based
+designs are preferable for int8 DNN accelerators. This is a
+width-dependent conclusion that the error metrics alone would not reveal:
+judged only by MRED, Mitchell appears better than truncation at $K=6$.
+
+\paragraph{Error metrics do not predict accuracy.} Truncation at $K=6$
+has twice the MRED of Mitchell but the same accuracy, and $K=8$ has
+\SI{24}{\percent} MRED with less than half a point of accuracy loss.
+Selecting approximate units for DNN accelerators therefore requires
+application-level evaluation rather than arithmetic metrics alone.
+
+\section{Conclusion and Future Work}
 \label{sec:next}
+This project built a complete evaluation flow for approximate arithmetic in
+DNN accelerators: bit-accurate models, exhaustive RTL verification, logic
+synthesis and quantized-network inference. For an int8 MLP, a truncated
+multiplier with $K=8$ reduces multiplier area by \SI{59.8}{\percent} and
+MAC area by \SI{38.9}{\percent} at a cost of \SI{0.42}{\percent} accuracy,
+while the Mitchell multiplier is found to be unsuitable at this width.
+Possible extensions are:
 \begin{enumerate}[nosep]
-  \item \textbf{Hardware cost.} Logic synthesis with Yosys to compare cell
-        count and estimated area, giving the final
-        \emph{area saving vs.\ accuracy loss} Pareto front.
-  \item \textbf{Extensions.} Error-compensated truncation, and evaluation on
-        a convolutional network with a harder dataset.
+  \item error-compensated truncation (adding a constant bias to cancel the
+        systematic under-estimation);
+  \item evaluation on a convolutional network and a harder dataset such as
+        CIFAR-10, where error tolerance is expected to be lower;
+  \item synthesis with a characterized standard-cell library to obtain
+        power and timing in absolute units;
+  \item a small PE array built from the approximate MAC, with per-layer
+        selection of the approximation level.
 \end{enumerate}
 
 \section{Repository Structure}
@@ -319,6 +416,8 @@ python/error_analysis.py    exhaustive error metrics and heatmaps
 python/train_quantize.py    NumPy MLP training and int8 quantization
 python/approx_inference.py  inference through approximate multipliers
 python/gen_vectors.py       golden vectors for RTL verification
+python/synth.py             Yosys/ABC synthesis, area and logic depth
+python/pareto.py            design-space plot and summary table
 rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
                             mul_mitchell, mac
 tb/                         self-checking testbenches, run_sim.sh
