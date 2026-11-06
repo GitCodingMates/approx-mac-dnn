@@ -344,27 +344,15 @@ bit~15 of the product magnitude can never be set because the largest
 magnitude is $128\times128=2^{14}$, and the upper bits of the 32-bit
 accumulator are not reached by 784-term dot products of int8 data.
 
-Figure~\ref{fig:wave} shows the first cycles of the MAC test, rendered
-from the VCD file dumped by ModelSim. The product of the operands applied
-in one cycle appears in \texttt{p\_q} one cycle later and is added to
-\texttt{acc} in the following cycle; during the idle cycle (\texttt{en}
-low) the accumulator holds its value. The accumulator matches the
-reference model on every cycle.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=\textwidth]{mac_waveform.png}
-\caption{ModelSim waveform of the exact MAC (values in decimal). The
-green row is the cycle-accurate reference model of the testbench.}
-\label{fig:wave}
-\end{figure}
-
-Figure~\ref{fig:msgui} shows the same test in the ModelSim GUI, opened with
+Figure~\ref{fig:msgui} shows the MAC test in the ModelSim GUI, opened with
 \texttt{vsim -do gui.do}. The predefined layout (\texttt{wave\_mac.do})
 groups the control signals, operands and, for each of the three MAC
 variants, the RTL accumulator directly above the reference model, so that
-any divergence is visible at a glance. The \texttt{errs} counter stays at
-zero for the whole run.
+any divergence is visible at a glance. The product of the operands applied
+in one cycle appears in \texttt{p\_q} one cycle later and is added to
+\texttt{acc} in the following cycle; while \texttt{en} is low the
+accumulator holds its value. The \texttt{errs} counter stays at zero for
+the whole run.
 
 \begin{figure}[h]
 \centering
@@ -488,7 +476,6 @@ rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
                             mul_mitchell, mac
 tb/                         self-checking testbenches, run_sim.sh
 sim/modelsim/               ModelSim project, do-scripts, coverage flow
-python/plot_waveform.py     timing diagram from the ModelSim VCD dump
 results/                    metrics (CSV), figures, quantized model
 docs/report.tex             this report
 \end{lstlisting}
