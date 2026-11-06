@@ -47,19 +47,26 @@ def yosys_cmd():
     raise SystemExit("Yosys not found (pip install yowasp-yosys)")
 
 
-def synth(top, params, tmp):
+LOG_DIR = os.path.join(ROOT, "results", "synth")
+
+
+def synth(name, top, params, tmp):
     # Paths are relative to ROOT: the WebAssembly Yosys build can only
     # access its working directory.
+    rel = lambda p: os.path.relpath(p, ROOT).replace("\\", "/")
     chparam = "".join(f"chparam -set {k} {v} {top}; " for k, v in params.items())
-    stat_json = os.path.relpath(os.path.join(tmp, "stat.json"), ROOT).replace("\\", "/")
-    log = os.path.relpath(os.path.join(tmp, "yosys.log"), ROOT).replace("\\", "/")
+    stat_json = rel(os.path.join(tmp, "stat.json"))
+    log = rel(os.path.join(LOG_DIR, f"{name}.log"))
+    netlist = rel(os.path.join(LOG_DIR, f"{name}_netlist.v"))
     script = (
-        "read_verilog " + " ".join(os.path.relpath(p, ROOT).replace("\\", "/") for p in RTL) + "; "
+        "read_verilog " + " ".join(rel(p) for p in RTL) + "; "
         f"{chparam}"
         f"synth -flatten -top {top}; "
         "abc -g AND,NAND,OR,NOR,XOR,XNOR,ANDNOT,ORNOT,MUX; opt_clean; "
+        "stat; "
         f"tee -q -o {stat_json} stat -json; "
-        "ltp -noff"
+        "ltp -noff; "
+        f"write_verilog -noattr {netlist}"
     )
     out = subprocess.run([yosys_cmd(), "-q", "-l", log, "-p", script],
                          capture_output=True, text=True, cwd=ROOT)
@@ -75,9 +82,12 @@ def synth(top, params, tmp):
 
 def main():
     rows = []
+    os.makedirs(LOG_DIR, exist_ok=True)
+    ver = subprocess.run([yosys_cmd(), "-V"], capture_output=True, text=True).stdout.split("(")[0]
+    print(f"{ver.strip()} + ABC, 2-input gate library\n")
     with tempfile.TemporaryDirectory(dir=ROOT, prefix=".synth_") as tmp:
         for name, top, params in DESIGNS:
-            cells, depth = synth(top, params, tmp)
+            cells, depth = synth(name, top, params, tmp)
             unknown = set(cells) - set(GE)
             if unknown:
                 raise RuntimeError(f"no GE weight for {unknown}")
