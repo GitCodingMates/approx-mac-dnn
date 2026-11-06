@@ -1,0 +1,6 @@
+multiplier,area_GE,area_saving_%,logic_depth,MRED_%,accuracy_%,accuracy_drop_%
+exact,573.2,0.0,35,0.0,96.81,0.0
+trunc_k4,465.1,18.9,33,1.7172,96.82,-0.01
+trunc_k6,368.5,35.7,32,7.5868,96.77,0.04
+trunc_k8,230.7,59.8,24,23.8709,96.39,0.42
+mitchell,544.9,4.9,49,3.6994,96.77,0.04
