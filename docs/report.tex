@@ -452,25 +452,21 @@ has twice the MRED of Mitchell but the same accuracy, and $K=8$ has
 Selecting approximate units for DNN accelerators therefore requires
 application-level evaluation rather than arithmetic metrics alone.
 
-\section{Conclusion and Future Work}
+\section{Conclusion}
 \label{sec:next}
-This project built a complete evaluation flow for approximate arithmetic in
-DNN accelerators: bit-accurate models, exhaustive RTL verification, logic
-synthesis and quantized-network inference. For an int8 MLP, a truncated
-multiplier with $K=8$ reduces multiplier area by \SI{59.8}{\percent} and
-MAC area by \SI{38.9}{\percent} at a cost of \SI{0.42}{\percent} accuracy,
-while the Mitchell multiplier is found to be unsuitable at this width.
-Possible extensions are:
-\begin{enumerate}[nosep]
-  \item error-compensated truncation (adding a constant bias to cancel the
-        systematic under-estimation);
-  \item evaluation on a convolutional network and a harder dataset such as
-        CIFAR-10, where error tolerance is expected to be lower;
-  \item synthesis with a characterized standard-cell library to obtain
-        power and timing in absolute units;
-  \item a small PE array built from the approximate MAC, with per-layer
-        selection of the approximation level.
-\end{enumerate}
+This work presented a complete evaluation flow for approximate arithmetic in
+DNN accelerators, covering bit-accurate modelling, exhaustive RTL
+verification, logic synthesis and quantized-network inference. For an int8
+MLP on MNIST, a column-truncated multiplier with $K=8$ reduces multiplier
+area by \SI{59.8}{\percent} and MAC area by \SI{38.9}{\percent} at a cost of
+\SI{0.42}{\percent} in classification accuracy, and $K=6$ achieves a
+\SI{35.7}{\percent} multiplier area reduction with no measurable accuracy
+loss. The Mitchell logarithmic multiplier, despite a moderate arithmetic
+error, offers less than \SI{5}{\percent} area reduction at this operand
+width while lengthening the critical path. The results show that the
+suitability of an approximate multiplier depends on the datapath width and
+must be judged at the application level rather than by arithmetic error
+metrics alone.
 
 \section{Repository Structure}
 \begin{lstlisting}
