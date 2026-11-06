@@ -17,7 +17,7 @@
 \graphicspath{{../results/}}
 
 \lstset{basicstyle=\ttfamily\small,keywordstyle=\color{blue!60!black}\bfseries,
-        commentstyle=\color{gray},frame=single,breaklines=true,columns=fullflexible}
+        commentstyle=\color{gray},frame=single,breaklines=true,columns=fixed,keepspaces=true,basewidth=0.5em}
 
 \title{\textbf{Approximate Multiply--Accumulate Units for\\Energy-Efficient DNN Accelerators}\\[4pt]
        \large Error Characterization and Application-Level Evaluation}
@@ -326,7 +326,18 @@ builds the \texttt{work} library, \texttt{sim\_mul.do} and
 in GUI mode), and \texttt{regression.do} runs the complete suite in batch
 mode, merges the coverage databases of both tests and writes a coverage
 report. The RTL is compiled with statement, branch, condition, expression
-and toggle coverage enabled.
+and toggle coverage enabled. Figure~\ref{fig:msreg} shows the console
+output of the batch regression; the complete transcript is kept in
+\texttt{results/modelsim\_regression.log}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\textwidth]{modelsim_regression.png}
+\caption{Batch regression in ModelSim (\texttt{vsim -c -do regression.do}):
+exhaustive multiplier test, cycle-accurate MAC test and merged coverage
+summary.}
+\label{fig:msreg}
+\end{figure}
 
 \begin{table}[h]
 \centering
@@ -386,6 +397,33 @@ $\approx4.3$--$6$). Delay is approximated by the logic depth, i.e.\ the
 number of gates on the longest combinational path. These figures are not
 a substitute for a characterized PDK, but they are consistent across
 designs and therefore suitable for relative comparison.
+
+For every design the flow stores the complete Yosys log, including the
+cell statistics and the longest path, and the gate-level netlist
+(\texttt{results/synth/}). Figure~\ref{fig:yosysrun} shows a run of the
+flow together with the statistics that Yosys reports for the truncated
+multiplier with $K=8$; the 155 logic cells match Table~\ref{tab:synth}
+(the additional \texttt{\$scopeinfo} entry is hierarchy metadata, not
+logic). Figure~\ref{fig:schem} shows the MAC unit as elaborated by Yosys
+before technology mapping: the multiplier instance, the pipeline
+flip-flops (\texttt{\$dff}), the accumulator adder (\texttt{\$add}) and the
+multiplexers implementing reset, enable and clear.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.72\textwidth]{synth/yosys_terminal.png}
+\caption{Synthesis flow output and Yosys cell statistics of the truncated
+multiplier ($K=8$), read from its synthesis log.}
+\label{fig:yosysrun}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{synth/mac_schematic.pdf}
+\caption{Yosys schematic of the MAC unit with the truncated multiplier
+($K=8$), generated with \texttt{show} after elaboration.}
+\label{fig:schem}
+\end{figure}
 
 \subsection{Results}
 \begin{table}[h]
@@ -476,6 +514,7 @@ python/train_quantize.py    NumPy MLP training and int8 quantization
 python/approx_inference.py  inference through approximate multipliers
 python/gen_vectors.py       golden vectors for RTL verification
 python/synth.py             Yosys/ABC synthesis, area and logic depth
+python/synth_report.py      cell statistics from a synthesis log
 python/pareto.py            design-space plot and summary table
 docs/figures/mac_unit.tex   MAC block diagram (TikZ)
 rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,

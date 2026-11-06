@@ -80,7 +80,26 @@ accumulator. Only the multiplier block differs between variants.
   <br><em>Figure 2. Relative error of each approximate multiplier over the operand space.</em>
 </p>
 
-### 3.2 Hardware Cost and Accuracy
+### 3.2 Logic Synthesis
+
+Each design is synthesized with Yosys 0.70 and ABC. For every design the
+complete Yosys log (cell statistics, longest path) and the gate-level netlist
+are stored in [`results/synth/`](results/synth).
+
+<p align="center">
+  <img src="results/synth/yosys_terminal.png" width="620" alt="Yosys synthesis run">
+  <br><em>Figure 3. Synthesis flow output and Yosys cell statistics of the truncated multiplier (K = 8).
+  The 155 logic cells match the table below; <code>$scopeinfo</code> is hierarchy metadata.</em>
+</p>
+
+<p align="center">
+  <img src="results/synth/mac_schematic.png" width="950" alt="Yosys schematic of the MAC">
+  <br><em>Figure 4. Yosys schematic of the MAC unit with the truncated multiplier (K = 8) after elaboration:
+  multiplier instance, pipeline flip-flops (<code>$dff</code>), accumulator adder (<code>$add</code>) and
+  the multiplexers for reset, enable and clear.</em>
+</p>
+
+### 3.3 Hardware Cost and Accuracy
 
 | Design | Area (GE) | Saving (%) | Logic depth | MNIST accuracy (%) |
 |---|---:|---:|---:|---:|
@@ -98,10 +117,10 @@ The float32 reference accuracy is 96.82 %.
 
 <p align="center">
   <img src="results/pareto.png" width="850" alt="Design space">
-  <br><em>Figure 3. Accuracy and mean relative error versus multiplier area.</em>
+  <br><em>Figure 5. Accuracy and mean relative error versus multiplier area.</em>
 </p>
 
-### 3.3 Functional Verification
+### 3.4 Functional Verification
 
 | Testbench | Designs | Checks | Mismatches |
 |---|---|---:|---:|
@@ -111,11 +130,17 @@ The float32 reference accuracy is 96.82 %.
 Merged code coverage of the RTL: statements, branches, conditions and
 expressions 100 %; toggles 88.5 %, where all unexercised toggle bins are
 structurally constant (truncated low-order product bits, product bit 15,
-upper accumulator bits).
+upper accumulator bits). The complete transcript of the regression is kept in
+[`results/modelsim_regression.log`](results/modelsim_regression.log).
+
+<p align="center">
+  <img src="results/modelsim_regression.png" width="680" alt="ModelSim batch regression">
+  <br><em>Figure 6. Batch regression in ModelSim: exhaustive multiplier test, cycle-accurate MAC test and merged coverage.</em>
+</p>
 
 <p align="center">
   <img src="results/modelsim_wave.png" width="900" alt="ModelSim wave window">
-  <br><em>Figure 4. ModelSim wave window during <code>tb_mac</code>; each MAC accumulator is shown above its reference.</em>
+  <br><em>Figure 7. ModelSim wave window during <code>tb_mac</code>; each MAC accumulator is shown above its reference.</em>
 </p>
 
 ## 4. Discussion
@@ -147,6 +172,7 @@ python/train_quantize.py   MLP training and int8 quantization
 python/approx_inference.py inference through approximate multipliers
 python/gen_vectors.py      golden vectors for RTL verification
 python/synth.py            Yosys/ABC synthesis, area and logic depth
+python/synth_report.py     cell statistics from a synthesis log
 python/pareto.py           design-space plot and summary table
 results/                   metrics (CSV), figures, quantized model
 docs/                      report (LaTeX source and PDF)
