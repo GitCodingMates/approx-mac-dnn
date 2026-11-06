@@ -1,0 +1,727 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.70 (git sha1 28ba3cb92, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Running command `read_verilog rtl/mac.v rtl/mul_exact.v rtl/mul_mitchell.v rtl/mul_trunc.v rtl/sign_mag.v; chparam -set K 8 mul_trunc; synth -flatten -top mul_trunc; abc -g AND,NAND,OR,NOR,XOR,XNOR,ANDNOT,ORNOT,MUX; opt_clean; stat; tee -q -o .synth_s0yuvkow/stat.json stat -json; ltp -noff; write_verilog -noattr results/synth/trunc_k8_netlist.v' --
+
+1. Executing Verilog-2005 frontend: rtl/mac.v
+Parsing Verilog input from `rtl/mac.v' to AST representation.
+Generating RTLIL representation for module `\mac'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: rtl/mul_exact.v
+Parsing Verilog input from `rtl/mul_exact.v' to AST representation.
+Generating RTLIL representation for module `\mul_exact'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/mul_mitchell.v
+Parsing Verilog input from `rtl/mul_mitchell.v' to AST representation.
+Generating RTLIL representation for module `\mul_mitchell'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: rtl/mul_trunc.v
+Parsing Verilog input from `rtl/mul_trunc.v' to AST representation.
+Generating RTLIL representation for module `\mul_trunc'.
+Successfully finished Verilog frontend.
+
+5. Executing Verilog-2005 frontend: rtl/sign_mag.v
+Parsing Verilog input from `rtl/sign_mag.v' to AST representation.
+Generating RTLIL representation for module `\sign_mag'.
+Successfully finished Verilog frontend.
+Parameter \K = 8
+
+6. Executing AST frontend in derive mode using pre-parsed AST for module `\mul_trunc'.
+Parameter \K = 8
+Generating RTLIL representation for module `$paramod\mul_trunc\K=s32'00000000000000000000000000001000'.
+
+7. Executing SYNTH pass.
+
+7.1. Executing HIERARCHY pass (managing design hierarchy).
+
+7.1.1. Analyzing design hierarchy..
+Top module:  \mul_trunc
+Used module:     \sign_mag
+
+7.1.2. Analyzing design hierarchy..
+Top module:  \mul_trunc
+Used module:     \sign_mag
+Removing unused module `\mul_mitchell'.
+Removing unused module `\mul_exact'.
+Removing unused module `\mac'.
+Removed 3 unused modules.
+
+7.2. Executing PROC pass (convert processes to netlists).
+
+7.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+7.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+7.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 8 assignments to connections.
+
+7.2.4. Executing PROC_INIT pass (extract init attributes).
+
+7.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+7.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+7.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$116'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$120'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$124'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$128'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$132'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$136'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$140'.
+Creating decoders for process `\mul_trunc.$proc$rtl/mul_trunc.v:22$144'.
+
+7.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\mul_trunc.\row[0]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$116'.
+No latch inferred for signal `\mul_trunc.\row[1]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$120'.
+No latch inferred for signal `\mul_trunc.\row[2]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$124'.
+No latch inferred for signal `\mul_trunc.\row[3]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$128'.
+No latch inferred for signal `\mul_trunc.\row[4]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$132'.
+No latch inferred for signal `\mul_trunc.\row[5]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$136'.
+No latch inferred for signal `\mul_trunc.\row[6]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$140'.
+No latch inferred for signal `\mul_trunc.\row[7]' from process `\mul_trunc.$proc$rtl/mul_trunc.v:22$144'.
+
+7.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+7.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+7.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$116'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$120'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$124'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$128'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$132'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$136'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$140'.
+Removing empty process `mul_trunc.$proc$rtl/mul_trunc.v:22$144'.
+Cleaned up 0 empty switches.
+
+7.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+<suppressed ~17 debug messages>
+Optimizing module sign_mag.
+
+7.3. Executing CHECK pass (checking for obvious problems).
+Checking module mul_trunc...
+Checking module sign_mag...
+Found and reported 0 problems.
+
+7.4. Executing FLATTEN pass (flatten design).
+Deleting now unused module sign_mag.
+<suppressed ~1 debug messages>
+
+7.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+<suppressed ~1 debug messages>
+
+7.6. Executing CHECK pass (checking for obvious problems).
+Checking module mul_trunc...
+Found and reported 0 problems.
+
+7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 0 unused cells and 38 unused wires.
+<suppressed ~2 debug messages>
+
+7.8. Executing OPT pass (performing simple optimizations).
+
+7.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 23 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \mul_trunc..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $flatten\u_sm.$ternary$rtl/sign_mag.v:10$102: \a -> { 1'0 \a [6:0] }
+      Replacing known input bits on port A of cell $flatten\u_sm.$ternary$rtl/sign_mag.v:11$105: \b -> { 1'0 \b [6:0] }
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~6 debug messages>
+
+7.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \mul_trunc.
+Performed a total of 0 changes.
+
+7.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 23 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.8.9. Finished fast OPT passes. (There is nothing left to do.)
+
+7.9. Executing FSM pass (extract and optimize FSM).
+
+7.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+7.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+7.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+7.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+7.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+7.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+7.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+7.10. Executing OPT pass (performing simple optimizations).
+
+7.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 23 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \mul_trunc..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~6 debug messages>
+
+7.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \mul_trunc.
+Performed a total of 0 changes.
+
+7.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 23 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.10.9. Finished fast OPT passes. (There is nothing left to do.)
+
+7.11. Executing WREDUCE pass (reducing word size of cells).
+Removed top 7 bits (of 16) from port A of cell mul_trunc.$add$rtl/mul_trunc.v:26$108 ($add).
+Removed top 6 bits (of 16) from port B of cell mul_trunc.$add$rtl/mul_trunc.v:26$108 ($add).
+Removed top 5 bits (of 16) from port Y of cell mul_trunc.$add$rtl/mul_trunc.v:26$108 ($add).
+Removed top 5 bits (of 16) from port A of cell mul_trunc.$add$rtl/mul_trunc.v:26$109 ($add).
+Removed top 5 bits (of 16) from port B of cell mul_trunc.$add$rtl/mul_trunc.v:26$109 ($add).
+Removed top 4 bits (of 16) from port Y of cell mul_trunc.$add$rtl/mul_trunc.v:26$109 ($add).
+Removed top 4 bits (of 16) from port A of cell mul_trunc.$add$rtl/mul_trunc.v:26$110 ($add).
+Removed top 4 bits (of 16) from port B of cell mul_trunc.$add$rtl/mul_trunc.v:26$110 ($add).
+Removed top 3 bits (of 16) from port Y of cell mul_trunc.$add$rtl/mul_trunc.v:26$110 ($add).
+Removed top 3 bits (of 16) from port A of cell mul_trunc.$add$rtl/mul_trunc.v:26$111 ($add).
+Removed top 3 bits (of 16) from port B of cell mul_trunc.$add$rtl/mul_trunc.v:26$111 ($add).
+Removed top 2 bits (of 16) from port Y of cell mul_trunc.$add$rtl/mul_trunc.v:26$111 ($add).
+Removed top 2 bits (of 16) from port A of cell mul_trunc.$add$rtl/mul_trunc.v:26$112 ($add).
+Removed top 2 bits (of 16) from port B of cell mul_trunc.$add$rtl/mul_trunc.v:26$112 ($add).
+Removed top 1 bits (of 16) from port Y of cell mul_trunc.$add$rtl/mul_trunc.v:26$112 ($add).
+Removed top 1 bits (of 16) from port A of cell mul_trunc.$add$rtl/mul_trunc.v:26$113 ($add).
+Removed top 1 bits (of 16) from port B of cell mul_trunc.$add$rtl/mul_trunc.v:26$113 ($add).
+Removed top 7 bits (of 8) from port B of cell mul_trunc.$flatten\u_sm.$add$rtl/sign_mag.v:11$104 ($add).
+Removed top 7 bits (of 8) from port B of cell mul_trunc.$flatten\u_sm.$add$rtl/sign_mag.v:10$101 ($add).
+Removed top 4 bits (of 16) from wire mul_trunc.$add$rtl/mul_trunc.v:26$109_Y.
+Removed top 5 bits (of 16) from wire mul_trunc.$add$rtl/mul_trunc.v:26$108_Y.
+Removed top 1 bits (of 16) from wire mul_trunc.row[7].
+Removed top 2 bits (of 16) from wire mul_trunc.row[6].
+Removed top 3 bits (of 16) from wire mul_trunc.row[5].
+Removed top 4 bits (of 16) from wire mul_trunc.row[4].
+Removed top 5 bits (of 16) from wire mul_trunc.row[3].
+Removed top 6 bits (of 16) from wire mul_trunc.row[2].
+Removed top 7 bits (of 16) from wire mul_trunc.row[1].
+Removed top 1 bits (of 16) from wire mul_trunc.$add$rtl/mul_trunc.v:26$112_Y.
+Removed top 2 bits (of 16) from wire mul_trunc.$add$rtl/mul_trunc.v:26$111_Y.
+Removed top 3 bits (of 16) from wire mul_trunc.$add$rtl/mul_trunc.v:26$110_Y.
+
+7.12. Executing PEEPOPT pass (run peephole optimizers).
+
+7.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 0 unused cells and 12 unused wires.
+<suppressed ~1 debug messages>
+
+7.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module mul_trunc:
+  creating $macc model for $flatten\u_sm.$add$rtl/sign_mag.v:10$101 ($add).
+  creating $macc model for $flatten\u_sm.$add$rtl/sign_mag.v:11$104 ($add).
+  creating $macc model for $add$rtl/mul_trunc.v:26$112 ($add).
+  creating $macc model for $add$rtl/mul_trunc.v:26$113 ($add).
+  creating $macc model for $neg$rtl/mul_trunc.v:28$114 ($neg).
+  creating $macc model for $add$rtl/mul_trunc.v:26$108 ($add).
+  creating $macc model for $add$rtl/mul_trunc.v:26$109 ($add).
+  creating $macc model for $add$rtl/mul_trunc.v:26$110 ($add).
+  creating $macc model for $add$rtl/mul_trunc.v:26$111 ($add).
+  merging $macc model for $add$rtl/mul_trunc.v:26$110 into $add$rtl/mul_trunc.v:26$111.
+  merging $macc model for $add$rtl/mul_trunc.v:26$109 into $add$rtl/mul_trunc.v:26$111.
+  merging $macc model for $add$rtl/mul_trunc.v:26$108 into $add$rtl/mul_trunc.v:26$111.
+  merging $macc model for $add$rtl/mul_trunc.v:26$112 into $add$rtl/mul_trunc.v:26$113.
+  merging $macc model for $add$rtl/mul_trunc.v:26$111 into $add$rtl/mul_trunc.v:26$113.
+  creating $alu model for $macc $neg$rtl/mul_trunc.v:28$114.
+  creating $alu model for $macc $flatten\u_sm.$add$rtl/sign_mag.v:11$104.
+  creating $alu model for $macc $flatten\u_sm.$add$rtl/sign_mag.v:10$101.
+  creating $macc cell for $add$rtl/mul_trunc.v:26$113: $auto$alumacc.cc:427:replace_macc$161
+  creating $alu cell for $flatten\u_sm.$add$rtl/sign_mag.v:10$101: $auto$alumacc.cc:578:replace_alu$162
+  creating $alu cell for $flatten\u_sm.$add$rtl/sign_mag.v:11$104: $auto$alumacc.cc:578:replace_alu$165
+  creating $alu cell for $neg$rtl/mul_trunc.v:28$114: $auto$alumacc.cc:578:replace_alu$168
+  created 3 $alu and 1 $macc cells.
+
+7.15. Executing SHARE pass (SAT-based resource sharing).
+
+7.16. Executing OPT pass (performing simple optimizations).
+
+7.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 23 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \mul_trunc..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~6 debug messages>
+
+7.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \mul_trunc.
+Performed a total of 0 changes.
+
+7.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 23 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 5 unused cells and 5 unused wires.
+<suppressed ~6 debug messages>
+
+7.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.16.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.16.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \mul_trunc..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~6 debug messages>
+
+7.16.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \mul_trunc.
+Performed a total of 0 changes.
+
+7.16.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 18 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.16.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.16.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.16.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.16.16. Finished fast OPT passes. (There is nothing left to do.)
+
+7.17. Executing MEMORY pass.
+
+7.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+7.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+7.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+7.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+7.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+7.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+7.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+7.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+7.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.19. Executing OPT pass (performing simple optimizations).
+
+7.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+<suppressed ~28 debug messages>
+
+7.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 18 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 0 unused cells and 14 unused wires.
+<suppressed ~1 debug messages>
+
+7.19.5. Finished fast OPT passes.
+
+7.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+7.21. Executing OPT pass (performing simple optimizations).
+
+7.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 18 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \mul_trunc..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~6 debug messages>
+
+7.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \mul_trunc.
+Performed a total of 0 changes.
+
+7.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 18 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.21.6. Executing OPT_SHARE pass.
+
+7.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+
+7.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.21.10. Finished fast OPT passes. (There is nothing left to do.)
+
+7.22. Executing TECHMAP pass (map to technology primitives).
+
+7.22.1. Executing Verilog-2005 frontend: /share/techmap.v
+Parsing Verilog input from `/share/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+7.22.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $and.
+Using template $paramod$02488ff6fa51b28bbfa470bdd9b0e548b3357746\_90_alu for cells of type $alu.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add { \row[1] [8] 8'00000000 } (9 bits, unsigned)
+  add { \row[2] [9:8] 8'00000000 } (10 bits, unsigned)
+  add { \row[3] [10:8] 8'00000000 } (11 bits, unsigned)
+  add { \row[4] [11:8] 8'00000000 } (12 bits, unsigned)
+  add { \row[5] [12:8] 8'00000000 } (13 bits, unsigned)
+  add { \row[6] [13:8] 8'00000000 } (14 bits, unsigned)
+  add { \row[7] [14:8] 8'00000000 } (15 bits, unsigned)
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000100 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000111 for cells of type $fa.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod$6df0329addda9228fcc2546de2aaf14ad26c98e1\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010000 for cells of type $lcu.
+Using extmapper simplemap for cells of type $or.
+No more expansions possible.
+<suppressed ~642 debug messages>
+
+7.23. Executing OPT pass (performing simple optimizations).
+
+7.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+<suppressed ~565 debug messages>
+
+7.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 274 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 28 unused cells and 347 unused wires.
+<suppressed ~29 debug messages>
+
+7.23.5. Finished fast OPT passes.
+
+7.24. Executing ABC pass (technology mapping using ABC).
+
+7.24.1. Summary of detected clock domains:
+  246 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+7.24.2. Extracting gate netlist of module `\mul_trunc' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+7.24.2.1. Executed ABC.
+Extracted 245 gates and 262 wires to a netlist network with 16 inputs and 8 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+
+7.24.2.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       28
+ABC RESULTS:            ANDNOT cells:        4
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:       38
+ABC RESULTS:               NOR cells:       12
+ABC RESULTS:                OR cells:       27
+ABC RESULTS:             ORNOT cells:        4
+ABC RESULTS:              XNOR cells:       21
+ABC RESULTS:               XOR cells:       20
+ABC RESULTS:        internal signals:      238
+ABC RESULTS:           input signals:       16
+ABC RESULTS:          output signals:        8
+Removing temp directory.
+Removing global temp directory.
+
+7.25. Executing OPT pass (performing simple optimizations).
+
+7.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module mul_trunc.
+
+7.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\mul_trunc'.
+Computing hashes of 156 cells of `\mul_trunc'.
+Finding duplicate cells in `\mul_trunc'.
+Removed a total of 0 cells.
+
+7.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 0 unused cells and 74 unused wires.
+<suppressed ~3 debug messages>
+
+7.25.5. Finished fast OPT passes.
+
+7.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `mul_trunc'. Setting top module to mul_trunc.
+
+7.26.1. Analyzing design hierarchy..
+Top module:  \mul_trunc
+
+7.26.2. Analyzing design hierarchy..
+Top module:  \mul_trunc
+Removed 0 unused modules.
+
+7.27. Printing statistics.
+
+=== mul_trunc ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      165 wires
+      343 wire bits
+       18 public wires
+      196 public wire bits
+        3 ports
+       32 port bits
+      156 cells
+        4   $_ANDNOT_
+       28   $_AND_
+        1   $_MUX_
+       38   $_NAND_
+       12   $_NOR_
+        4   $_ORNOT_
+       27   $_OR_
+       21   $_XNOR_
+       20   $_XOR_
+        1   $scopeinfo
+
+7.28. Executing CHECK pass (checking for obvious problems).
+Checking module mul_trunc...
+Found and reported 0 problems.
+
+8. Executing ABC pass (technology mapping using ABC).
+
+8.1. Summary of detected clock domains:
+  156 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.2. Extracting gate netlist of module `\mul_trunc' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.2.1. Executed ABC.
+Extracted 155 gates and 171 wires to a netlist network with 16 inputs and 8 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+
+8.2.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       27
+ABC RESULTS:            ANDNOT cells:        4
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:       41
+ABC RESULTS:               NOR cells:       12
+ABC RESULTS:                OR cells:       26
+ABC RESULTS:             ORNOT cells:        3
+ABC RESULTS:              XNOR cells:       20
+ABC RESULTS:               XOR cells:       21
+ABC RESULTS:        internal signals:      147
+ABC RESULTS:           input signals:       16
+ABC RESULTS:          output signals:        8
+Removing temp directory.
+Removing global temp directory.
+
+9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \mul_trunc..
+Removed 0 unused cells and 171 unused wires.
+<suppressed ~1 debug messages>
+
+10. Printing statistics.
+
+=== mul_trunc ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      165 wires
+      343 wire bits
+       18 public wires
+      196 public wire bits
+        3 ports
+       32 port bits
+      156 cells
+        4   $_ANDNOT_
+       27   $_AND_
+        1   $_MUX_
+       41   $_NAND_
+       12   $_NOR_
+        3   $_ORNOT_
+       26   $_OR_
+       20   $_XNOR_
+       21   $_XOR_
+        1   $scopeinfo
+
+11. Executing LTP pass (find longest path).
+
+Longest topological path in mul_trunc (length=24):
+    0: \a [1]
+    1: $abc$1286$new_n26 (via $abc$1286$blif$1286$1)
+    2: $abc$1286$new_n27 (via $abc$1286$blif$1286$2)
+    3: $abc$1286$new_n28 (via $abc$1286$blif$1286$3)
+    4: $abc$1286$new_n29 (via $abc$1286$blif$1286$4)
+    5: $abc$1286$new_n37 (via $abc$1286$blif$1286$12)
+    6: $abc$1286$new_n38 (via $abc$1286$blif$1286$13)
+    7: $abc$1286$new_n39 (via $abc$1286$blif$1286$14)
+    8: $abc$1286$new_n54 (via $abc$1286$blif$1286$29)
+    9: $abc$1286$new_n56 (via $abc$1286$blif$1286$31)
+   10: $abc$1286$new_n58 (via $abc$1286$blif$1286$33)
+   11: $abc$1286$new_n82 (via $abc$1286$blif$1286$57)
+   12: $abc$1286$new_n131 (via $abc$1286$blif$1286$106)
+   13: $abc$1286$new_n134 (via $abc$1286$blif$1286$109)
+   14: $abc$1286$new_n135 (via $abc$1286$blif$1286$110)
+   15: $abc$1286$new_n136 (via $abc$1286$blif$1286$111)
+   16: $abc$1286$new_n147 (via $abc$1286$blif$1286$122)
+   17: $abc$1286$new_n155 (via $abc$1286$blif$1286$130)
+   18: $abc$1286$new_n158 (via $abc$1286$blif$1286$133)
+   19: $abc$1286$new_n159 (via $abc$1286$blif$1286$134)
+   20: $abc$1286$new_n160 (via $abc$1286$blif$1286$135)
+   21: $abc$1286$new_n161 (via $abc$1286$blif$1286$136)
+   22: $abc$1286$new_n162 (via $abc$1286$blif$1286$137)
+   23: \p [15] (via $abc$1286$blif$1286$148)
+   24: \p [14] (via $abc$1286$blif$1286$149)
+
+12. Executing Verilog backend.
+
+12.1. Executing BMUXMAP pass.
+
+12.2. Executing DEMUXMAP pass.
+Dumping module `\mul_trunc'.
+
+End of script. Logfile hash: 47d1a91e32, time: 0.39s, user: 0.39s, system: 0.00s
+Yosys 0.70 (git sha1 28ba3cb92, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 72% 2x abc (0 sec), 6% 7x read_verilog (0 sec), ...

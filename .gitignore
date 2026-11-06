@@ -19,3 +19,5 @@ sim/modelsim/*.log
 sim/modelsim/coverage_*.txt
 sim/modelsim/wlf*
 sim/modelsim/*.cr.mti
+!results/synth/*.log
+!results/modelsim_regression.log
