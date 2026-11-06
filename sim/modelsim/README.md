@@ -11,7 +11,7 @@ commands.
 | `approx_mac.mpf` | ModelSim project with all RTL and testbench sources (relative paths) |
 | `compile.do` | Creates `work`, compiles RTL with code coverage (`+cover=bcest`) and the testbenches |
 | `sim_mul.do` | Exhaustive multiplier test (`tb_mul`), adds a wave view in GUI mode |
-| `sim_mac.do` | Cycle-accurate MAC test (`tb_mac`), dumps the first 400 ns to `mac.vcd` |
+| `sim_mac.do` | Cycle-accurate MAC test (`tb_mac`) |
 | `wave_mac.do` | Grouped waveform layout for `tb_mac` |
 | `regression.do` | Compile, run both tests, merge coverage, write coverage reports |
 | `gui.do` | Interactive session: compile, run `tb_mac` and open the wave window |
@@ -83,10 +83,3 @@ holes:
 - the upper accumulator bits are not reached by 784-term dot products of
   random int8 data;
 - `a[7]` only rises once in `tb_mul` because operands are swept in order.
-
-## Waveform
-
-`python python/plot_waveform.py` renders `mac.vcd` to
-`results/mac_waveform.png`:
-
-![MAC waveform](../../results/mac_waveform.png)
