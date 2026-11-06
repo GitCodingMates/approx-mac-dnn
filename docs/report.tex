@@ -250,18 +250,25 @@ two's-complement operands to 8-bit magnitudes and computes the product sign.
         one PE description.
 \end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
-\setlength{\fboxsep}{6pt}
-\fbox{\parbox{0.9\textwidth}{\centering\small
-$a,b$ (int8) $\;\rightarrow\;$ \texttt{sign\_mag} $\;\rightarrow\;$
-\{\,exact $\mid$ truncated($K$) $\mid$ Mitchell\,\} $\;\rightarrow\;$
-\fbox{\texttt{p\_q}} $\;\rightarrow\;$ $+$ $\;\rightarrow\;$
-\fbox{\texttt{acc} (int32)}$\,\circlearrowleft$}}
-\caption{MAC datapath. Boxed signals are pipeline registers; the multiplier
-block is chosen by the \texttt{MUL} parameter.}
+\includegraphics[width=\textwidth]{mac_block_diagram.pdf}
+\caption{Block diagram of the pipelined MAC unit. Yellow boxes are
+registers. Stage~1 converts the operands to sign-magnitude form and
+computes the product with the multiplier selected by \texttt{MUL};
+stage~2 sign-extends the registered product and adds it to the 32-bit
+accumulator. The delayed \texttt{clr\_q} selects 0 instead of the
+accumulator feedback, so a new dot product starts without an idle cycle,
+and the delayed \texttt{en} (\texttt{v\_q}) enables the accumulator
+register.}
 \label{fig:mac}
 \end{figure}
+
+Figure~\ref{fig:mac} shows the resulting datapath. Only the multiplier
+block changes between the evaluated designs; the operand conversion,
+pipeline registers, adder and accumulator are identical. This is why the
+area saving of a complete MAC (Section~\ref{sec:synth}) is smaller than
+that of the multiplier alone.
 
 \section{Functional Verification}
 Verification reuses the Python models as the golden reference.
@@ -472,6 +479,7 @@ python/approx_inference.py  inference through approximate multipliers
 python/gen_vectors.py       golden vectors for RTL verification
 python/synth.py             Yosys/ABC synthesis, area and logic depth
 python/pareto.py            design-space plot and summary table
+python/draw_mac.py          MAC block diagram
 rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
                             mul_mitchell, mac
 tb/                         self-checking testbenches, run_sim.sh
