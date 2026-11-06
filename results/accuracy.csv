@@ -1,0 +1,6 @@
+multiplier,accuracy_%
+exact,96.81
+trunc_k4,96.82
+trunc_k6,96.77
+trunc_k8,96.39
+mitchell,96.77
