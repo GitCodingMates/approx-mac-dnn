@@ -13,5 +13,7 @@ quit -sim
 vcover merge -quiet regression.ucdb tb_mul.ucdb tb_mac.ucdb
 vcover report -summary regression.ucdb       -output coverage_summary.txt
 vcover report -details -code bcest regression.ucdb -output coverage_details.txt
-echo [exec cat coverage_summary.txt]
+quietly set fh [open coverage_summary.txt r]
+echo [read $fh]
+close $fh
 quit -f
