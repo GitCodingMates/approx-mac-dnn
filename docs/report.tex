@@ -3,6 +3,8 @@
 \usepackage[margin=2.3cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,shapes.geometric,backgrounds}
 \usepackage{booktabs}
 \usepackage{siunitx}
 \usepackage{xcolor}
@@ -252,9 +254,9 @@ two's-complement operands to 8-bit magnitudes and computes the product sign.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{mac_block_diagram.pdf}
-\caption{Block diagram of the pipelined MAC unit. Yellow boxes are
-registers. Stage~1 converts the operands to sign-magnitude form and
+\resizebox{\textwidth}{!}{\input{figures/mac_unit.tex}}
+\caption{Block diagram of the pipelined MAC unit. Yellow boxes with a
+clock triangle are registers. Stage~1 converts the operands to sign-magnitude form and
 computes the product with the multiplier selected by \texttt{MUL};
 stage~2 sign-extends the registered product and adds it to the 32-bit
 accumulator. The delayed \texttt{clr\_q} selects 0 instead of the
@@ -479,7 +481,7 @@ python/approx_inference.py  inference through approximate multipliers
 python/gen_vectors.py       golden vectors for RTL verification
 python/synth.py             Yosys/ABC synthesis, area and logic depth
 python/pareto.py            design-space plot and summary table
-python/draw_mac.py          MAC block diagram
+docs/figures/mac_unit.tex   MAC block diagram (TikZ)
 rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
                             mul_mitchell, mac
 tb/                         self-checking testbenches, run_sim.sh

@@ -1,0 +1,96 @@
+% Block diagram of the pipelined MAC unit (rtl/mac.v).
+% Requires: tikz with libraries arrows.meta, backgrounds
+\begin{tikzpicture}[
+    font=\footnotesize,
+    >={Stealth[length=2mm]},
+    wire/.style={thick, ->},
+    blk/.style={draw, thick, rounded corners=2pt, fill=blue!6, align=center},
+    sub/.style={draw, rounded corners=1.5pt, fill=white, text width=3.9cm,
+                minimum height=0.46cm, font=\scriptsize, anchor=center},
+    reg/.style={draw, thick, fill=yellow!22, minimum width=1.1cm, minimum height=1.2cm,
+                align=center, font=\footnotesize\ttfamily,
+                path picture={\draw ([xshift=-1.5mm]path picture bounding box.south)
+                              -- ++(1.5mm,2mm) -- ++(1.5mm,-2mm);}},
+    note/.style={font=\scriptsize, text=black!60},
+]
+
+% ---------------------------------------------------------------- stages
+\begin{scope}[on background layer]
+  \fill[blue!3]  (1.05,-1.55) rectangle (10.5,5.3);
+  \fill[green!4] (10.5,-1.55) rectangle (15.15,5.3);
+\end{scope}
+\node[font=\bfseries, text=blue!55!black]  at (5.7,4.95)  {Stage 1: multiply};
+\node[font=\bfseries, text=green!40!black] at (12.7,4.95) {Stage 2: accumulate};
+
+% ---------------------------------------------------------------- datapath
+\node[blk, minimum width=2.0cm, minimum height=2.1cm] (sm) at (2.3,2.9)
+     {\texttt{\textbf{sign\_mag}}\\[3pt] $|a|,\ |b|$\\[2pt]
+      \scriptsize $\mathit{neg}=a_7\oplus b_7$};
+
+\node[blk, minimum width=4.5cm, minimum height=3.0cm] (mul) at (6.3,2.9) {};
+\node[font=\bfseries] at (6.3,4.08) {Multiplier};
+\node[note] at (6.3,3.74) {selected by parameter \texttt{MUL}};
+\node[sub] at (6.3,3.25) {\texttt{\textbf{0}}\; exact array (64 PP bits)};
+\node[sub] at (6.3,2.70) {\texttt{\textbf{1}}\; truncated: drop cols $<K$};
+\node[sub] at (6.3,2.15) {\texttt{\textbf{2}}\; Mitchell: LOD+shift+add};
+\node[note] at (6.3,1.68) {apply sign $\rightarrow p$};
+
+\node[reg] (pq) at (9.85,2.9) {p\_q\\[-1pt]\tiny 16 b};
+\node[blk, fill=white, minimum width=1.1cm, minimum height=0.9cm] (sx) at (11.1,2.9)
+     {\scriptsize sign\\[-2pt]\scriptsize ext.};
+\node[draw, thick, circle, fill=green!12, minimum size=0.75cm, font=\large\bfseries]
+     (add) at (12.4,2.9) {+};
+\node[reg] (acc) at (13.8,2.9) {acc\\[-1pt]\tiny 32 b};
+
+% inputs
+\node[font=\ttfamily\bfseries] (a) at (0.2,3.45) {a};
+\node[font=\ttfamily\bfseries] (b) at (0.2,2.35) {b};
+\draw[wire] (a) -- (a -| sm.west) node[pos=.5, above, note] {8};
+\draw[wire] (b) -- (b -| sm.west) node[pos=.5, above, note] {8};
+
+% stage 1 wires
+\draw[wire] ([yshift=4mm]sm.east) -- ([yshift=4mm]sm.east -| mul.west)
+     node[pos=.5, above, note] {8+8};
+\draw[wire] ([yshift=-5mm]sm.east) -- ([yshift=-5mm]sm.east -| mul.west)
+     node[pos=.5, above, font=\scriptsize\ttfamily] {neg};
+\draw[wire] (mul.east |- pq) -- (pq.west)
+     node[pos=.5, above, font=\scriptsize\ttfamily] {p}
+     node[pos=.5, below, note] {16};
+
+% stage 2 wires
+\draw[wire] (pq.east) -- (sx.west);
+\draw[wire] (sx.east) -- (add.west) node[pos=.5, below, note] {32};
+\draw[wire] (add.east) -- (acc.west) node[pos=.5, below, note] {32};
+\draw[wire] (acc.east) -- (15.5,2.9)
+     node[right, font=\ttfamily\bfseries, align=left] {acc\\[-2pt][31:0]};
+
+% clear multiplexer and feedback
+\draw[thick, fill=white] (11.8,0.92) -- (13.0,0.92) -- (12.75,1.48) -- (12.05,1.48) -- cycle;
+\coordinate (muxN) at (12.4,1.48);
+\coordinate (muxW) at (11.93,1.2);
+\draw[wire] (muxN) -- (add.south);
+\coordinate (fb) at (14.7,2.9);
+\fill (fb) circle (1.6pt);
+\draw[wire] (fb) |- (12.65,0.05) -- (12.65,0.92);
+\draw[wire] (12.15,0.4) node[below, font=\ttfamily] {0} -- (12.15,0.92);
+\node[font=\tiny] at (12.15,1.08) {1};
+\node[font=\tiny] at (12.65,1.08) {0};
+\node[note, anchor=north] at (13.2,0.05) {feedback};
+
+% ---------------------------------------------------------------- control
+\node[font=\ttfamily\bfseries] (clr) at (0.2,0.6)  {clr};
+\node[font=\ttfamily\bfseries] (en)  at (0.2,-0.9) {en};
+\node[reg, minimum height=0.8cm] (cq) at (9.85,0.6)  {clr\_q};
+\node[reg, minimum height=0.8cm] (vq) at (9.85,-0.9) {v\_q};
+\draw[wire] (clr) -- (cq.west);
+\draw[wire] (en)  -- (vq.west);
+\draw[wire] (cq.east) -- (11.35,0.6) |- (muxW)
+     node[pos=.25, left, note] {select};
+\draw[wire] (vq.east) -| (acc.south);
+\node[note, anchor=west] at (13.85,-0.45) {enable};
+
+% ---------------------------------------------------------------- footer
+\node[note, anchor=west] at (0.0,-1.85)
+     {All registers: posedge \texttt{clk}, synchronous \texttt{rst}. \quad
+      Latency: 2 cycles. \quad Throughput: 1 MAC/cycle.};
+\end{tikzpicture}
