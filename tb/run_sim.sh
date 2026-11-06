@@ -7,10 +7,10 @@ python ../python/gen_vectors.py > /dev/null
 
 if command -v vsim > /dev/null 2>&1; then
     rm -rf work && vlib work > /dev/null
-    vlog -quiet ../rtl/*.v tb_mul.v tb_mac.v
+    vlog -quiet +define+VEC_DIR=\"vectors\" ../rtl/*.v tb_mul.v tb_mac.v
     vsim -c -quiet tb_mul -do "run -all; quit -f"
     vsim -c -quiet tb_mac -do "run -all; quit -f"
 else
-    iverilog -g2005 -o tb_mul.vvp ../rtl/*.v tb_mul.v && vvp tb_mul.vvp
-    iverilog -g2005 -o tb_mac.vvp ../rtl/*.v tb_mac.v && vvp tb_mac.vvp
+    iverilog -g2005 -DVEC_DIR=\"vectors\" -o tb_mul.vvp ../rtl/*.v tb_mul.v && vvp tb_mul.vvp
+    iverilog -g2005 -DVEC_DIR=\"vectors\" -o tb_mac.vvp ../rtl/*.v tb_mac.v && vvp tb_mac.vvp
 fi

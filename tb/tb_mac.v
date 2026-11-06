@@ -1,4 +1,7 @@
 `timescale 1ns/1ps
+`ifndef VEC_DIR
+`define VEC_DIR "../../tb/vectors"
+`endif
 // Self-checking MAC testbench. Random operand streams with periodic
 // accumulator clears are applied to one MAC per multiplier type; a
 // reference accumulator built from the golden product tables checks
@@ -53,9 +56,9 @@ module tb_mac;
     end
 
     initial begin
-        $readmemh("vectors/exact.hex",    g_exact);
-        $readmemh("vectors/trunc_k6.hex", g_k6);
-        $readmemh("vectors/mitchell.hex", g_mitchell);
+        $readmemh({`VEC_DIR, "/exact.hex"},    g_exact);
+        $readmemh({`VEC_DIR, "/trunc_k6.hex"}, g_k6);
+        $readmemh({`VEC_DIR, "/mitchell.hex"}, g_mitchell);
         errs = 0; checks = 0;
         repeat (3) @(posedge clk);
         rst <= 0;

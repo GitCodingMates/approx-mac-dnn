@@ -1,7 +1,10 @@
 `timescale 1ns/1ps
+`ifndef VEC_DIR
+`define VEC_DIR "../../tb/vectors"
+`endif
 // Exhaustive self-checking testbench: every multiplier is compared against
 // the Python golden model for all 2^16 signed 8-bit operand pairs.
-// Run from the tb/ directory so the vectors/ paths resolve.
+// Vector directory: +define+VEC_DIR (default suits sim/modelsim).
 module tb_mul;
     reg  signed [7:0]  a, b;
     wire signed [15:0] p_exact, p_k4, p_k6, p_k8, p_mitchell;
@@ -36,11 +39,11 @@ module tb_mul;
     endtask
 
     initial begin
-        $readmemh("vectors/exact.hex",    g_exact);
-        $readmemh("vectors/trunc_k4.hex", g_k4);
-        $readmemh("vectors/trunc_k6.hex", g_k6);
-        $readmemh("vectors/trunc_k8.hex", g_k8);
-        $readmemh("vectors/mitchell.hex", g_mitchell);
+        $readmemh({`VEC_DIR, "/exact.hex"},    g_exact);
+        $readmemh({`VEC_DIR, "/trunc_k4.hex"}, g_k4);
+        $readmemh({`VEC_DIR, "/trunc_k6.hex"}, g_k6);
+        $readmemh({`VEC_DIR, "/trunc_k8.hex"}, g_k8);
+        $readmemh({`VEC_DIR, "/mitchell.hex"}, g_mitchell);
         e_exact = 0; e_k4 = 0; e_k6 = 0; e_k8 = 0; e_mitchell = 0;
 
         for (i = 0; i < 65536; i = i + 1) begin
