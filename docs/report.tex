@@ -9,6 +9,7 @@
 \usepackage{siunitx}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{float}
 \usepackage{hyperref}
 \usepackage{caption}
 \usepackage{enumitem}
@@ -160,7 +161,7 @@ Table~\ref{tab:error} summarizes the exhaustive error characterization, and
 Figure~\ref{fig:heat} shows how the relative error is distributed over the
 input space.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Error characterization over all $2^{16}$ signed 8-bit input pairs.}
 \label{tab:error}
@@ -177,7 +178,7 @@ Mitchell       & 87.89 & 151.34 & 0.924 & 3.70  & 1024 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{error_heatmaps.png}
 \caption{Relative error (\%) of each approximate multiplier as a function of
@@ -194,7 +195,7 @@ validates the model. Truncation exhibits a clear knob: each increase of $k$ by
 two columns raises the MED by roughly a factor of five.
 
 \subsection{Application-level accuracy}
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{MNIST test accuracy of the int8 MLP with each multiplier.
 Float32 reference: \SI{96.82}{\percent}.}
@@ -250,7 +251,7 @@ two's-complement operands to 8-bit magnitudes and computes the product sign.
         description.
 \end{itemize}
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \resizebox{\textwidth}{!}{\input{figures/mac_unit.tex}}
 \caption{Block diagram of the pipelined MAC unit. Yellow boxes with a
@@ -288,7 +289,7 @@ ModelSim; both are also compatible with Icarus Verilog.
         with the same two-cycle latency checks the output on every cycle.
 \end{itemize}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{RTL verification results.}
 \label{tab:verif}
@@ -324,7 +325,7 @@ and toggle coverage enabled. Figure~\ref{fig:msreg} shows the console
 output of the batch regression; the complete transcript is kept in
 \texttt{results/modelsim\_regression.log}.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.78\textwidth]{modelsim_regression.png}
 \caption{Batch regression in ModelSim (\texttt{vsim -c -do regression.do}):
@@ -333,7 +334,7 @@ summary.}
 \label{fig:msreg}
 \end{figure}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Merged code coverage of the RTL over both testbenches (21 instances).}
 \label{tab:cov}
@@ -366,7 +367,7 @@ any divergence is visible at a glance. While \texttt{en} is low the
 accumulator holds its value, and the \texttt{errs} counter stays at zero
 for the whole run.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{modelsim_wave.png}
 \caption{ModelSim SE-64 2020.4 wave window during \texttt{tb\_mac}: exact,
@@ -382,7 +383,7 @@ zero. After its release the first operands are applied at
 and the accumulator one cycle after that, at \SI{55}{\nano\second}. The
 \texttt{clr} pulse with the first operands starts the first dot product.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{modelsim_reset.png}
 \caption{Start of \texttt{tb\_mac} (0--\SI{120}{\nano\second}): reset,
@@ -414,7 +415,7 @@ multiplier with $K=8$; the 155 logic cells match Table~\ref{tab:synth}
 (the additional \texttt{\$scopeinfo} entry is hierarchy metadata, not
 logic).
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.72\textwidth]{synth/yosys_terminal.png}
 \caption{Synthesis flow output and Yosys cell statistics of the truncated
@@ -422,7 +423,7 @@ multiplier ($K=8$), read from its synthesis log.}
 \label{fig:yosysrun}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{synth/mac_schematic.pdf}
 \caption{Yosys schematic of the MAC unit with the truncated multiplier
@@ -444,7 +445,7 @@ Table~\ref{tab:synth} lists the cell count, flip-flop count, area and logic
 depth of every multiplier and of three complete MAC units after technology
 mapping. Figure~\ref{fig:pareto} relates these areas to the arithmetic error
 of Table~\ref{tab:error} and the MNIST accuracy of Table~\ref{tab:acc}.
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Synthesis results. Savings are relative to the exact multiplier
 or the exact MAC, respectively.}
@@ -467,7 +468,7 @@ MAC, Mitchell      & 621 & 50 & 1145.5 & 1.9  & 63 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{pareto.png}
 \caption{Design space of the 8-bit multipliers. Left: MNIST accuracy versus
