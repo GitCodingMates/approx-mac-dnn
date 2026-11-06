@@ -89,6 +89,13 @@ Coverage: 100 % statements, branches, conditions and expressions; 88.5 % toggles
   <img src="results/modelsim_wave.png" width="900" alt="ModelSim waveform">
 </p>
 
+Start of the run: reset is held for three cycles, then the pipeline fills and the
+first products reach the accumulators.
+
+<p align="center">
+  <img src="results/modelsim_reset.png" width="900" alt="ModelSim reset and pipeline fill">
+</p>
+
 ## Repository layout
 
 ```

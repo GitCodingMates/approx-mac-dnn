@@ -383,6 +383,22 @@ truncated ($K=6$) and Mitchell MACs, each with its reference accumulator.}
 \label{fig:msgui}
 \end{figure}
 
+Figure~\ref{fig:msreset} shows the first \SI{120}{\nano\second} of the same
+run. Before the first clock edge the registers are undefined (red);
+\texttt{rst} is held high for three cycles and clears all registers to
+zero. After its release the first operands are applied at
+\SI{35}{\nano\second}, their product reaches \texttt{p\_q} one cycle later
+and the accumulator one cycle after that, at \SI{55}{\nano\second}. The
+\texttt{clr} pulse with the first operands starts the first dot product.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{modelsim_reset.png}
+\caption{Start of \texttt{tb\_mac} (0--\SI{120}{\nano\second}): reset,
+pipeline fill and the first accumulations.}
+\label{fig:msreset}
+\end{figure}
+
 \section{Logic Synthesis and Design-Space Exploration}
 \label{sec:synth}
 
