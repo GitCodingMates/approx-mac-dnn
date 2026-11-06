@@ -244,13 +244,10 @@ two's-complement operands to 8-bit magnitudes and computes the product sign.
         extraction by clearing the leading one, two barrel shifters, one
         16-bit adder and a comparator/multiplexer that selects between the
         two cases of Eq.~(3).
-  \item \texttt{mac \#(MUL,K)} -- a two-stage pipelined MAC. Stage~1
-        registers the product, stage~2 sign-extends it and accumulates into
-        a 32-bit register. A \texttt{clr} input restarts the accumulation so
-        consecutive dot products can be streamed without bubbles, and an
-        \texttt{en} input supports idle cycles. The multiplier is selected at
-        elaboration time with a \texttt{generate} block, so all variants share
-        one PE description.
+  \item \texttt{mac \#(MUL,K)} -- the two-stage pipelined MAC of
+        Figure~\ref{fig:mac}. The multiplier is selected at elaboration time
+        with a \texttt{generate} block, so all variants share one PE
+        description.
 \end{itemize}
 
 \begin{figure}[t]
@@ -299,11 +296,7 @@ ModelSim; both are also compatible with Icarus Verilog.
 \toprule
 Testbench & Design & Checks & Mismatches \\
 \midrule
-\texttt{tb\_mul} & exact             & 65{,}536 & 0 \\
-                 & truncated $K{=}4$ & 65{,}536 & 0 \\
-                 & truncated $K{=}6$ & 65{,}536 & 0 \\
-                 & truncated $K{=}8$ & 65{,}536 & 0 \\
-                 & Mitchell          & 65{,}536 & 0 \\
+\texttt{tb\_mul} & exact, trunc.\ $K{=}4/6/8$, Mitchell & $5\times65{,}536$ & 0 \\
 \midrule
 \texttt{tb\_mac} & exact, trunc.\ $K{=}6$, Mitchell & 20{,}005 cycles & 0 \\
 \bottomrule
@@ -369,11 +362,9 @@ Figure~\ref{fig:msgui} shows the MAC test in the ModelSim GUI, opened with
 \texttt{vsim -do gui.do}. The predefined layout (\texttt{wave\_mac.do})
 groups the control signals, operands and, for each of the three MAC
 variants, the RTL accumulator directly above the reference model, so that
-any divergence is visible at a glance. The product of the operands applied
-in one cycle appears in \texttt{p\_q} one cycle later and is added to
-\texttt{acc} in the following cycle; while \texttt{en} is low the
-accumulator holds its value. The \texttt{errs} counter stays at zero for
-the whole run.
+any divergence is visible at a glance. While \texttt{en} is low the
+accumulator holds its value, and the \texttt{errs} counter stays at zero
+for the whole run.
 
 \begin{figure}[h]
 \centering
@@ -421,10 +412,7 @@ cell statistics and the longest path, and the gate-level netlist
 flow together with the statistics that Yosys reports for the truncated
 multiplier with $K=8$; the 155 logic cells match Table~\ref{tab:synth}
 (the additional \texttt{\$scopeinfo} entry is hierarchy metadata, not
-logic). Figure~\ref{fig:schem} shows the MAC unit as elaborated by Yosys
-before technology mapping: the multiplier instance, the pipeline
-flip-flops (\texttt{\$dff}), the accumulator adder (\texttt{\$add}) and the
-multiplexers implementing reset, enable and clear.
+logic).
 
 \begin{figure}[h]
 \centering
@@ -444,7 +432,7 @@ synchronous reset (\texttt{\$sdff}) and enable (\texttt{\$sdffe}).}
 \label{fig:schem}
 \end{figure}
 
-The synthesized netlist matches the block diagram of Figure~\ref{fig:mac}
+The MAC netlist of Figure~\ref{fig:schem} matches the block diagram of Figure~\ref{fig:mac}
 element by element: the multiplier instance, the four registers
 (\texttt{\$144}--\texttt{\$146} for \texttt{p\_q}, \texttt{v\_q} and
 \texttt{clr\_q}, and \texttt{\$143} for \texttt{acc}), the clear multiplexer
@@ -512,54 +500,19 @@ cancels most of the benefit. Logarithmic multipliers are therefore better
 suited to wider datapaths (16 bits and above), while truncation-based
 designs are preferable for int8 DNN accelerators. This is a
 width-dependent conclusion that the error metrics alone would not reveal:
-judged only by MRED, Mitchell appears better than truncation at $K=6$.
-
-\paragraph{Error metrics do not predict accuracy.} Truncation at $K=6$
-has twice the MRED of Mitchell but the same accuracy, and $K=8$ has
-\SI{24}{\percent} MRED with less than half a point of accuracy loss.
-Selecting approximate units for DNN accelerators therefore requires
-application-level evaluation rather than arithmetic metrics alone.
+judged only by MRED, Mitchell appears better than truncation at $K=6$,
+although both reach the same accuracy (Table~\ref{tab:acc}).
 
 \section{Conclusion}
-\label{sec:next}
 This work presented a complete evaluation flow for approximate arithmetic in
 DNN accelerators, covering bit-accurate modelling, exhaustive RTL
-verification, logic synthesis and quantized-network inference. For an int8
-MLP on MNIST, a column-truncated multiplier with $K=8$ reduces multiplier
-area by \SI{59.8}{\percent} and MAC area by \SI{38.9}{\percent} at a cost of
-\SI{0.42}{\percent} in classification accuracy, and $K=6$ achieves a
-\SI{35.7}{\percent} multiplier area reduction with no measurable accuracy
-loss. The Mitchell logarithmic multiplier, despite a moderate arithmetic
-error, offers less than \SI{5}{\percent} area reduction at this operand
-width while lengthening the critical path. The results show that the
+verification, logic synthesis and quantized-network inference. For int8
+MNIST inference, column truncation with $K=8$ reduces MAC area by
+\SI{38.9}{\percent} at a cost of \SI{0.42}{\percent} accuracy, while the
+Mitchell multiplier is not competitive at this operand width. The
 suitability of an approximate multiplier depends on the datapath width and
 must be judged at the application level rather than by arithmetic error
 metrics alone.
-
-\section{Repository Structure}
-\begin{lstlisting}
-python/approx_mult.py       bit-accurate multiplier models
-python/error_analysis.py    exhaustive error metrics and heatmaps
-python/train_quantize.py    NumPy MLP training and int8 quantization
-python/approx_inference.py  inference through approximate multipliers
-python/gen_vectors.py       golden vectors for RTL verification
-python/synth.py             Yosys/ABC synthesis, area and logic depth
-python/synth_report.py      cell statistics from a synthesis log
-python/pareto.py            design-space plot and summary table
-docs/figures/mac_unit.tex   MAC block diagram (TikZ)
-rtl/                        Verilog: sign_mag, mul_exact, mul_trunc,
-                            mul_mitchell, mac
-tb/                         self-checking testbenches, run_sim.sh
-sim/modelsim/               ModelSim project, do-scripts, coverage flow
-results/                    metrics (CSV), figures, quantized model
-docs/report.tex             this report
-\end{lstlisting}
-All experiments are reproducible with
-\texttt{pip install -r requirements.txt}, running the Python scripts in the
-order listed above, and \texttt{vsim -c -do regression.do} in
-\texttt{sim/modelsim} for the RTL regression with coverage
-(\texttt{sh tb/run\_sim.sh} provides a minimal flow that also works with
-Icarus Verilog).
 
 \begin{thebibliography}{9}
 \bibitem{mitchell1962}
@@ -571,11 +524,6 @@ no.~4, pp.~512--517, 1962.
 H.~Jiang, F.~J.~H. Santiago, H.~Mo, L.~Liu, and J.~Han, ``Approximate
 arithmetic circuits: A survey, characterization, and recent applications,''
 \emph{Proceedings of the IEEE}, vol.~108, no.~12, pp.~2108--2135, 2020.
-
-\bibitem{mrazek2017}
-V.~Mrazek, R.~Hrbacek, Z.~Vasicek, and L.~Sekanina, ``EvoApprox8b: Library of
-approximate adders and multipliers for circuit design and benchmarking of
-approximation methods,'' in \emph{Proc.\ DATE}, 2017, pp.~258--261.
 
 \bibitem{jacob2018}
 B.~Jacob \emph{et al.}, ``Quantization and training of neural networks for
